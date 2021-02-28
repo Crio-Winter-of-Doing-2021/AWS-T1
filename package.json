@@ -1,0 +1,26 @@
+{
+  "name": "aws-t1",
+  "version": "1.0.0",
+  "description": "Open source Task scheduler and orchestrator for Lambda functions",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Crio-Winter-of-Doing-2021/AWS-T1.git"
+  },
+  "author": "Pushpendra Kumar/ Shantanu Sharma",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Crio-Winter-of-Doing-2021/AWS-T1/issues"
+  },
+  "homepage": "https://github.com/Crio-Winter-of-Doing-2021/AWS-T1#readme",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "ejs": "^3.1.6",
+    "express": "^4.17.1",
+    "lodash": "^4.17.21",
+    "mongoose": "^5.11.18"
+  }
+}
