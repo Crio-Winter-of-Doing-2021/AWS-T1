@@ -19,15 +19,17 @@ DB.connection();
 const Task = DB.createSchedulerCollection();
 
 //save a task schedule in tasks collection
-// const task=new Task({scheduleTimeSecond:"0",scheduleTimeMinute:"0",
-//     scheduleTimeHour:"0",scheduleTimeDayOfMonth:"0",
-//     scheduleTimeMonth:"0",scheduleTimeDayOfWeek:"0",
+// const task=new Task({lambdaURL:"aws-t1",timeDelayInMs:"3000",
 //     taskState:"scheduled"});
 // task.save();
 
 app.get("/",function(req,res){
-    console.log("Requesting home page")
+    console.log("Requesting home page");
     res.render("home");
+});
+
+app.get("/schedule",function(req,res){
+    res.render('taskSchedule');
 });
 
 app.listen(3000,function(){

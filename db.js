@@ -18,12 +18,8 @@ module.exports.connection=function(){
 module.exports.createSchedulerCollection=function(){
     //connection();
     const schedulerCollection= mongoose.Schema({
-        scheduleTimeSecond:String,
-        scheduleTimeMinute:String,
-        scheduleTimeHour:String,
-        scheduleTimeDayOfMonth:String,
-        scheduleTimeMonth:String,
-        scheduleTimeDayOfWeek:String,
+        lambdaURL:String,
+        timeDelayInMs:String,
         taskState:String
     });
     return mongoose.model("task",schedulerCollection);
