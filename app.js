@@ -37,39 +37,52 @@ app.post("/schedule",function(req,res){
     const taskState='scheduled';
     console.log("url: "+url);
     console.log("timeInMs: "+timeDelay);
-    
+    let id='';
     // schedule the aws lambda task
     var task = setTimeout(function(){
         axios.post(url, {
             'key1':'value1'
           })
           .then((response) => {
-            console.log(response);
+                //edge case: immediately executing tasks i.e timeDelay 0ms 
+                if(tasks.has(id))
+                {
+                    //TODO: update db to set taskState completed
+                    console.log('Task '+id+ '  deleted succefully');
+                    tasks.delete(id);
+                    console.log('successfully executed lambda');
+                    console.log(response);
+                }
+            
           }, (error) => {
-            console.log(error);
+                console.log('error occured while executing task')
+                console.log(error);
           });
     },timeDelay);
 
     //store task details in database
     const taskInfo = new Task({lambdaURL:url,timeDelayInMs:timeDelay,
-        taskState:taskState});
-        taskInfo.save(function(err,result){ 
-                if (err){ 
-                    console.log(err); 
-                } 
-                else{ 
-                    // need error handling 
-                    // console.log(result);
-                    // console.log(typeof result._id);
-                    let id=JSON.stringify(result._id);
-                    id=id.substring(1,id.length-1);
-                    console.log("id "+id);
-                    tasks.set(id,task);
-                    // console.log(tasks.get(id));
-                    //update state of task to cancelled in db
-                    res.json({'id':result._id});
-                } 
-        });
+                                taskState:taskState});
+    taskInfo.save(function(err,result){ 
+            if (err){ 
+                console.log(err); 
+            } 
+            else{ 
+                // need error handling 
+                // console.log(result);
+                // console.log(typeof result._id);
+                // let id=JSON.stringify(result._id);
+                // id=id.substring(1,id.length-1);
+                id=result._id.toString();
+                console.log("id "+id);
+                tasks.set(id,task);
+                // console.log(tasks.get(id));
+                //update state of task to cancelled in db
+                res.json({"success":
+                "Your task has been succesfully scheduled",
+                'id':result._id});
+            } 
+    });
     
 });
 
@@ -83,8 +96,18 @@ app.post("/cancel",function(req,res){
     //taskId=""+taskId;
     // console.log(tasks);
     // console.log('in cancel'+ tasks.get(taskId));
-    clearTimeout(tasks.get(taskId));
-    res.render('cancelTask');
+    if(tasks.has(taskId))
+    {
+        clearTimeout(tasks.get(taskId));
+        tasks.delete(taskId);
+        //TODO: update taskState to cancelled in DB
+        res.json({'success':'Task with id '+ taskId+ ' has been deleted successfully'});
+    }
+    else{
+        res.json({'error':'Task with id '+ taskId+' is either already completed or not scheduled'});
+    }
+    
+    //res.render('cancelTask');
 });
 
 app.listen(3000,function(){
