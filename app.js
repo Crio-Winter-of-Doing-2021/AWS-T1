@@ -45,10 +45,10 @@ app.post("/schedule",function(req,res){
     while(typeof checkbox!="undefined")
     {
         let temp='';
-        console.log(checkbox);
+        //console.log(checkbox);
         if(checkbox=="on")
         {
-            console.log('inside');
+            //console.log('inside');
             temp='key'+ind;
             const key=req.body[temp];
             temp='value'+ind;
@@ -64,7 +64,7 @@ app.post("/schedule",function(req,res){
         checkbox=req.body[temp];
         //console.log("checkbox "+checkbox)
     }
-    console.log(params);
+    console.log('params: '+params);
     // res.send('submitted');
     let id='';
     
