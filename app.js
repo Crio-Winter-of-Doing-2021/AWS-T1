@@ -33,22 +33,50 @@ app.get("/schedule",function(req,res){
 
 app.post("/schedule",function(req,res){
     const url=req.body.URL;
-    const timeDelay=req.body.timeInMs;
+    const timeDelay=req.body['timeInMs'];
     const taskState='scheduled';
     console.log("url: "+url);
     console.log("timeInMs: "+timeDelay);
+    let ind=0;
+    var params=[];
+    let checkbox=req.body.checkbox0;
+    // console.log('checkbox '+checkbox0);
+    // console.log(typeof checkbox0);
+    while(typeof checkbox!="undefined")
+    {
+        let temp='';
+        console.log(checkbox);
+        if(checkbox=="on")
+        {
+            console.log('inside');
+            temp='key'+ind;
+            const key=req.body[temp];
+            temp='value'+ind;
+            const value=req.body[temp];
+            //console.log(key+" "+value);
+            if(key!=""||value!="")
+            {
+                params.push({key,value});
+            }
+        }
+        ind++;
+        temp='checkbox'+ind;
+        checkbox=req.body[temp];
+        //console.log("checkbox "+checkbox)
+    }
+    console.log(params);
+    // res.send('submitted');
     let id='';
+    
     // schedule the aws lambda task
     var task = setTimeout(function(){
-        axios.post(url, {
-            'key1':'value1'
-          })
+        axios.post(url,params)
           .then((response) => {
                 //edge case: immediately executing tasks i.e timeDelay 0ms 
                 if(tasks.has(id))
                 {
                     //TODO: update db to set taskState completed
-                    console.log('Task '+id+ '  deleted succefully');
+                    console.log('Task '+id+ '  deleted succefully from map tasks');
                     tasks.delete(id);
                     console.log('successfully executed lambda');
                     console.log(response);
