@@ -32,8 +32,29 @@ module.exports.createSchedulerCollection=function(){
     return mongoose.model("task",schedulerCollection);
 };
 
-
-
+module.exports.updateTaskState = function(TaskModel,id,taskState){
+    TaskModel.findByIdAndUpdate(id,{taskState: taskState}, function(err, result){
+            if(err)
+            {
+                console.log('could not update');
+            }
+            else{
+                // console.log(id);
+                // console.log(taskState);
+                console.log('successfully updated taskState to: '+taskState);
+                //console.log(taskState);
+            }
+            
+    });
+    // var action=function(err,collection)
+    // {
+        
+    //     collection.updateOne({ _id:id },{ $set:{taskState:taskState }
+    //     });
+    // }
+    // //await Task.updateOne({ _id:id },{ $set: { taskState: taskState }});
+    // mongoose.connection.db.collection('tasks',action);
+}
 
 //connect to database
 //this.connection();
@@ -67,6 +88,3 @@ module.exports.createSchedulerCollection=function(){
 //     });
 // };
 
-
-
-module.exports

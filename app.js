@@ -17,7 +17,7 @@ app.use(bodyParser.json());
 DB.connection();
 
 //create or return a pre-created scheduler collection
-const Task = DB.createSchedulerCollection();
+const TaskModel = DB.createSchedulerCollection();
 
 //tasks maps taskId with its setTimeout() function call
 let tasks = new Map();
@@ -34,7 +34,7 @@ app.get("/schedule",function(req,res){
 app.post("/schedule",function(req,res){
     const url=req.body.URL;
     const timeDelay=req.body['timeInMs'];
-    const taskState='scheduled';
+    const taskState='initial stage';
     console.log("url: "+url);
     console.log("timeInMs: "+timeDelay);
     let ind=0;
@@ -64,18 +64,21 @@ app.post("/schedule",function(req,res){
         checkbox=req.body[temp];
         //console.log("checkbox "+checkbox)
     }
-    console.log('params: '+params);
+    //console.log('params: '+params);
     // res.send('submitted');
     let id='';
     
     // schedule the aws lambda task
     var task = setTimeout(function(){
+        //TODO: update in database taskState to running
+        DB.updateTaskState(TaskModel,id,'running');
         axios.post(url,params)
           .then((response) => {
                 //edge case: immediately executing tasks i.e timeDelay 0ms 
                 if(tasks.has(id))
                 {
-                    //TODO: update db to set taskState completed
+                    //TODO: update in database taskState to completed
+                    DB.updateTaskState(TaskModel,id,'completed');
                     console.log('Task '+id+ '  deleted succefully from map tasks');
                     tasks.delete(id);
                     console.log('successfully executed lambda');
@@ -83,14 +86,16 @@ app.post("/schedule",function(req,res){
                 }
             
           }, (error) => {
+                //TODO: update in database taskState to failed 
+                DB.updateTaskState(TaskModel,id,'failed');
                 console.log('error occured while executing task')
                 console.log(error);
           });
     },timeDelay);
 
     //store task details in database
-    const taskInfo = new Task({lambdaURL:url,timeDelayInMs:timeDelay,
-                                taskState:taskState});
+    const taskInfo = new TaskModel({lambdaURL:url,timeDelayInMs:timeDelay,
+                                taskState:'scheduled'});
     taskInfo.save(function(err,result){ 
             if (err){ 
                 console.log(err); 
@@ -105,7 +110,8 @@ app.post("/schedule",function(req,res){
                 console.log("id "+id);
                 tasks.set(id,task);
                 // console.log(tasks.get(id));
-                //update state of task to cancelled in db
+                //update state of taskState to scheduled in db
+                //DB.updateTaskState(TaskModel,id,'scheduled');
                 res.json({"success":
                 "Your task has been succesfully scheduled",
                 'id':result._id});
@@ -129,6 +135,7 @@ app.post("/cancel",function(req,res){
         clearTimeout(tasks.get(taskId));
         tasks.delete(taskId);
         //TODO: update taskState to cancelled in DB
+        DB.updateTaskState(TaskModel,taskId,'cancelled');
         res.json({'success':'Task with id '+ taskId+ ' has been deleted successfully'});
     }
     else{
