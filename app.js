@@ -4,7 +4,6 @@ const mongoose = require("mongoose");
 const session = require("express-session");
 const DB = require(__dirname + "/db.js");
 const axios = require("axios");
-const { body, validationResult } = require("express-validator");
 
 const app = express();
 app.set("view engine", "ejs");
@@ -14,7 +13,7 @@ app.use(express.static("public"));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-//flash messages utility
+//required for flash messages 
 app.use(
   session({
     secret: "Utr@1010",
@@ -29,6 +28,8 @@ app.use((req, res, next) => {
   delete req.session.message;
   next();
 });
+
+
 
 //connect to database
 DB.connection();
@@ -83,9 +84,9 @@ function saveScheduledTask(res, req, url, timeDelay, taskState, task) {
       req.session.message = {
         type: "success",
         intro: "Task Scheduled Successfully",
-        message: "please note of your taskId: " + id,
+        message: "please note your taskId for future reference: " + id,
       };
-      res.render("scheduleTask");
+      res.redirect("/schedule");
     }
   });
 }
@@ -130,25 +131,20 @@ app.get("/schedule", function (req, res) {
   res.render("scheduleTask");
 });
 
-app.post(
-  "/schedule",
-  [
-    body("URL", "Invalid URL").trim().isLength({ min: 1 }),
-    body("timeInMs", "Invalid time").trim().isLength({ min: 1 }),
-  ],
-  function (req, res) {
-    let errors = validationResult(req);
-    let errorArray = errors.array();
-    if (errorArray.length > 0) {
+app.post("/schedule",function (req, res) {
+    const url = req.body.URL;
+    const timeDelay = req.body["timeInMs"];
+    let isnum = /^\d+$/.test(timeDelay);
+    if (url.length==0||timeDelay.length==0||!isnum) {
+        console.log('in error');
       req.session.message = {
         type: "danger",
         intro: "Invalid Details",
-        message: "URL and Time must not be empty",
+        message: "please enter valid URL/Time",
       };
-      res.render("scheduleTask");
+      res.redirect("/schedule");
     } else {
-      const url = req.body.URL;
-      const timeDelay = req.body["timeInMs"];
+      
       const taskState = "Invalid";
       console.log("url: " + url);
       console.log("timeInMs: " + timeDelay);
@@ -170,20 +166,16 @@ app.get("/cancel", function (req, res) {
   res.render("cancelTask");
 });
 
-app.post(
-  "/cancel",
-  [body("taskId", "Invalid taskId").trim().isLength(24)],
-  function (req, res) {
-    let errors = validationResult(req);
-    let errorArray = errors.array();
-    if (errorArray.length > 0) {
+app.post("/cancel",function (req, res) {
+    let taskId = req.body.taskId;
+    if (taskId.length!=24) {
       req.session.message = {
         type: "danger",
         intro: "Invalid Task Id ",
         message: "Please provide a valid TaskId",
       };
     } else {
-      let taskId = req.body.taskId;
+      
       if (tasks.has(taskId)) {
         clearTimeout(tasks.get(taskId));
         tasks.delete(taskId);
@@ -191,7 +183,7 @@ app.post(
         DB.updateTaskState(TaskModel, taskId, "cancelled");
         req.session.message = {
           type: "success",
-          intro: "cancelled",
+          intro: "Task Deleted",
           message: "Task with id " + taskId + " has been deleted successfully",
         };
       } else {
