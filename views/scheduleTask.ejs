@@ -1,84 +1,120 @@
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="/images/icon.png" type="image/x-icon">
-    <!-- Bootstrap CDN -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
-    
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="/images/icon.png" type="image/x-icon" />
+
+    <!-- include libraries.ejs -->
+    <%- include('partials/libraries.ejs') %>
+
     <!-- custom css -->
-    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/styles.css" />
 
-    <!-- font-awesome cdn -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" integrity="sha512-HK5fgLBL+xu6dm/Ii3z4xhlSUyZgTT9tuc/hSrtw6uzJOvgRr2a9jyxxT1ely+B+xFAmJKVSTbpM/CuL7qxO8w==" crossorigin="anonymous" />
-
-    <!-- jquery CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
-    
     <title>Scheduler</title>
-</head>
-<body>
+  </head>
+  <body>
+    <% if(message){ %>
+    <div style="text-align: center" class="alert alert-<%=message.type%>">
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+      <strong><%=message.intro%></strong> <%=message.message%>
+    </div>
+    <% } %>
     <div class="scheduler">
-        <h1>Task Scheduler</h1>
-        <form action="" method="POST">
-            <!-- URL -->
-            <div class="form-group">
-              <label for="lambdaURL">URL</label>
-              <input type="text" class="form-control" name="URL"  placeholder="Enter AWS Lambda URL">
-            </div>
-            <!-- end URL -->
-             
-            <!-- query parameter -->
-            <div class="form-group">
-              <label for="params">Params</label>
-              <a href="#" id="addParams"><i class="fas fa-plus-circle"></i></a>
-              <ul id="paramsList" style="list-style-type:none;">
-                <li id="params0" >
-                  <div class="row">
-                    <div class="col">
-                      <input type="text" class="form-control" name="key0" placeholder="key">
-                    </div>
-                    <div class="col">
-                      <input type="text" class="form-control" name="value0" placeholder="value">
-                    </div>
-                    <input class="form-check-input"  type="checkbox" name="checkbox0" checked>
-                  </div>
-                </li>
-                
-              </ul>
-              
-            </div>
-            <!-- end of query parameter -->
+      <h1>Task Scheduler</h1>
+      <form action="" method="POST">
+        <!-- URL -->
+        <div class="form-group">
+          <label for="lambdaURL">URL</label>
+          <input
+            type="text"
+            class="form-control"
+            name="URL"
+            placeholder="Enter AWS Lambda URL"
+          />
+        </div>
+        <!-- end URL -->
 
-            <!-- Time Delay -->
-            <div class="form-group">
-              <label for="delayTime">TimeInMs</label>
-              <input type="text" class="form-control" name="timeInMs" placeholder="Time in Millisecond">
-            </div>
-            <!-- end of time delay -->
+        <!-- query parameter -->
+        <div class="form-group">
+          <label for="params">Params</label>
+          <a href="#" id="addParams"><i class="fas fa-plus-circle"></i></a>
+          <ul id="paramsList" style="list-style-type: none">
+            <li id="params0">
+              <div class="row">
+                <div class="col">
+                  <input
+                    type="text"
+                    class="form-control"
+                    name="key0"
+                    placeholder="key"
+                  />
+                </div>
+                <div class="col">
+                  <input
+                    type="text"
+                    class="form-control"
+                    name="value0"
+                    placeholder="value"
+                  />
+                </div>
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  name="checkbox0"
+                  checked
+                />
+              </div>
+            </li>
+          </ul>
+        </div>
+        <!-- end of query parameter -->
 
-            <!-- submit button -->
-            <button type="submit" class="btn btn-primary button">Schedule</button>
-            <!-- end submit button -->
-          </form>
+        <!-- Time Delay -->
+        <div class="form-group">
+          <label for="delayTime">TimeInMs</label>
+          <input
+            type="text"
+            class="form-control"
+            name="timeInMs"
+            placeholder="Time in Millisecond"
+          />
+        </div>
+        <!-- end of time delay -->
+
+        <!-- submit button -->
+        <button type="submit" class="btn btn-primary button">Schedule</button>
+        <!-- end submit button -->
+      </form>
     </div>
     <script>
-      $( document ).ready(function() {
-        $("#addParams").click(function(){
-          var paramsList=document.getElementById("paramsList");
-          var len=paramsList.getElementsByTagName("li").length;
+      $(document).ready(function () {
+        $("#addParams").click(function () {
+          var paramsList = document.getElementById("paramsList");
+          var len = paramsList.getElementsByTagName("li").length;
           //len+=1;
           console.log(len);
           //len=2;
-          var li = document.createElement('li');
-          li.id='params'+len;
-          li.innerHTML="<div class='row'><div class='col'><input type='text' class='form-control'"+ "name='"+ 'key'+ len+ "'" +   "placeholder='key' ></div><div class='col'><input type='text' class='form-control'"+ "name='"+"value" +len+  "' placeholder='value'></div><input class='form-check-input' type='checkbox' name='checkbox"+len+"' checked>";
+          var li = document.createElement("li");
+          li.id = "params" + len;
+          li.innerHTML =
+            "<div class='row'><div class='col'><input type='text' class='form-control'" +
+            "name='" +
+            "key" +
+            len +
+            "'" +
+            "placeholder='key' ></div><div class='col'><input type='text' class='form-control'" +
+            "name='" +
+            "value" +
+            len +
+            "' placeholder='value'></div><input class='form-check-input' type='checkbox' name='checkbox" +
+            len +
+            "' checked>";
           //console.log('hi');
           paramsList.appendChild(li);
         });
-        
-        $("ul").click(function(event){
+
+        $("ul").click(function (event) {
           //event.target.classList.toggle("disabled");
           //console.log(li.id);
           // console.log('ji');
@@ -89,9 +125,7 @@
           // $(removedLiId).remove();
           //   console.log(this.id);
         });
-          
       });
-        
     </script>
-</body>
+  </body>
 </html>
