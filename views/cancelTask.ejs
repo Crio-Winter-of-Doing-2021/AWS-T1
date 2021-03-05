@@ -3,14 +3,14 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" href="/images/icon.png" type="image/x-icon" />
+    <link rel="icon" href="/images/logo.jpg" type="image/x-icon" />
 
     <!-- including cdn of libraries -->
     <%- include('partials/libraries.ejs'); %>
 
     <!-- custom css -->
     <link rel="stylesheet" href="/css/styles.css" />
-    <title>cancelTask</title>
+    <title>cancel Task</title>
   </head>
   <body>
     <% if(message){ %>
@@ -20,7 +20,7 @@
     </div>
     <% } %>
     <div class="scheduler">
-      <h1>Delete Task</h1>
+      <h1 class="display-3 heading">Delete Task</h1>
       <form action="" method="POST">
         <div class="form-group">
           <label for="taskId">TaskId</label>

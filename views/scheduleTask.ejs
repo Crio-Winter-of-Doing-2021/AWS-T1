@@ -3,7 +3,7 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" href="/images/icon.png" type="image/x-icon" />
+    <link rel="icon" href="/images/logo.jpg" type="image/x-icon" />
 
     <!-- include libraries.ejs -->
     <%- include('partials/libraries.ejs') %>
@@ -11,7 +11,7 @@
     <!-- custom css -->
     <link rel="stylesheet" href="/css/styles.css" />
 
-    <title>Scheduler</title>
+    <title>Schedule Task</title>
   </head>
   <body>
     <% if(message){ %>
@@ -21,7 +21,7 @@
     </div>
     <% } %>
     <div class="scheduler">
-      <h1>Task Scheduler</h1>
+      <h1 class="display-3 heading">Task Scheduler</h1>
       <form action="" method="POST">
         <!-- URL -->
         <div class="form-group">
@@ -41,7 +41,7 @@
           <a href="#" id="addParams"><i class="fas fa-plus-circle"></i></a>
           <ul id="paramsList" style="list-style-type: none">
             <li id="params0">
-              <div class="row">
+              <div class="form-row">
                 <div class="col">
                   <input
                     type="text"
@@ -98,7 +98,7 @@
           var li = document.createElement("li");
           li.id = "params" + len;
           li.innerHTML =
-            "<div class='row'><div class='col'><input type='text' class='form-control'" +
+            "<div class='form-row'><div class='col'><input type='text' class='form-control'" +
             "name='" +
             "key" +
             len +

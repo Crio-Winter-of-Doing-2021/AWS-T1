@@ -1,17 +1,23 @@
 /* need to make it responsive (add media queries)*/
-
+body{
+    background-color: #f5f5f5;
+}
 .scheduler{
     margin-top:5%;
     margin-left: 20%;
     margin-right: 20%;
 }
 
-h1{
+.heading{
     font-family: Georgia, sans-serif;
-    font-size: 5em;
-    letter-spacing: -2px;
+    color: #930077;
     text-align: center;
     margin-bottom: 60px;
+}
+
+label{
+    font-family: Georgia, sans-serif;
+    font-weight: bold;
 }
 
 .button{
@@ -27,4 +33,19 @@ h1{
   /* for "disabled" effect */
   opacity: 0.5;
   background: #CCC;
+}
+
+/* ---------------------------------------------------
+    MEDIAQUERIES
+----------------------------------------------------- */
+
+@media (max-width: 600px) {
+    
+    .heading{
+        text-align: left;
+        font-size: 1.8rem;
+        font-weight: bold;
+        margin-top:50px;
+        margin-bottom: 30px;
+    }
 }
