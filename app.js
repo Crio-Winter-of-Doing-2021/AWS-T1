@@ -109,10 +109,16 @@ function executeAWSLambda(url, params) {
       }
     },
     (error) => {
-      //update in database taskState to failed
-      DB.updateTaskState(TaskModel, id, "failed");
-      console.log("error occured while executing task");
-      console.log(error);
+      if (tasks.has(id))
+      {
+        console.log("Task " + id + "  deleted succefully from map tasks");
+        tasks.delete(id);
+        //update in database taskState to failed
+        DB.updateTaskState(TaskModel, id, "failed");
+        console.log("error occured while executing task");
+        console.log(error);
+      }
+      
     }
   );
 }
@@ -177,6 +183,7 @@ app.post("/cancel",function (req, res) {
     } else {
       
       if (tasks.has(taskId)) {
+        
         clearTimeout(tasks.get(taskId));
         tasks.delete(taskId);
         //update taskState to cancelled in DB
@@ -193,7 +200,7 @@ app.post("/cancel",function (req, res) {
           message:
             "Task with id " +
             taskId +
-            " is either already completed or not scheduled",
+            " is either already executed or not scheduled",
         };
       }
     }
