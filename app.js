@@ -140,6 +140,7 @@ app.get("/schedule", function (req, res) {
 app.post("/schedule",function (req, res) {
     const url = req.body.URL;
     const timeDelay = req.body["timeInMs"];
+    //validating timeDelay(whether it is number or not)
     let isnum = /^\d+$/.test(timeDelay);
     if (url.length==0||timeDelay.length==0||!isnum) {
         console.log('in error');
@@ -167,6 +168,24 @@ app.post("/schedule",function (req, res) {
     }
   }
 );
+
+app.get("/retrieve-task-instances",function(req,res){
+  res.render('retrieveTaskInstances.ejs',{request:'get',results:[]});
+});
+
+app.post("/retrieve-task-instances",function(req,res){
+  let taskState = req.body.taskState;
+  TaskModel.find({taskState:taskState},function(err,results){
+     if(err)
+     {
+        res.send(err);
+     }
+     else{
+       res.render('retrieveTaskInstances',{request:'post',results:results});
+       //res.send(results);
+     }
+  })
+});
 
 app.get("/cancel", function (req, res) {
   res.render("cancelTask");
