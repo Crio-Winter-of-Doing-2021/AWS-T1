@@ -6,7 +6,7 @@
     <link rel="icon" href="/images/logo.jpg" type="image/x-icon" />
 
     <!-- include libraries.ejs -->
-    <%- include('partials/libraries.ejs') %>
+    <%- include('../partials/libraries.ejs') %>
 
     <!-- custom css -->
     <link rel="stylesheet" href="/css/styles.css" />
@@ -16,12 +16,11 @@
 <body>
     <div class="wrapper">
         <h1 class="display-3 heading">Retrieve Tasks</h1>
-        <form action="" method="POST">
+        <form action="" method="POST" id="retrieveTasks">
 
           <div class="form-group">
             <label for="taskInstance">Select Task Instance</label>
-            <input type="text" class="form-control"  name="taskState" list="states" placeholder="e.g. completed">
-            
+            <input type="text" class="form-control"  name="taskState" list="states" placeholder="e.g. completed" required>
             <datalist id="states">
                 <option value="completed">
                 <option value="running">
@@ -57,7 +56,10 @@
           </tbody>
       </table>
       </div>
-        <%}%>
-        
+      <%}%>
+      <script>
+        $("#retrieveTasks").validate();
+      </script> 
+      
 </body>
 </html>

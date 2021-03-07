@@ -10,8 +10,8 @@ app.set("view engine", "ejs");
 app.set("views", __dirname + "/views");
 
 app.use(express.static("public"));
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 //required for flash messages 
 app.use(
@@ -39,12 +39,11 @@ const TaskModel = DB.createSchedulerCollection();
 
 //tasks maps taskId with its setTimeout() function call
 let tasks = new Map();
-//id of the scheduled task
-let id = "";
+
 
 /*********************** Start of helper functions for routes ************************/
 
-//get params passed with the scheduled task
+//retrieves parameters passed with the scheduled task in endpoint /schedule
 function getParams(req) {
   let ind = 0;
   var params = [];
@@ -67,8 +66,14 @@ function getParams(req) {
   return params;
 }
 
-//save a scheduled task in database and add task to the map tasks
-function saveScheduledTask(res, req, url, timeDelay, taskState, task) {
+/*
+  function provided:
+  1) create a new task
+  2) save task as 'scheduled' in database
+  3) schedule the task using setTimeout function
+*/
+function saveScheduledTask(res, req, url, timeDelay, taskState) {
+  let params = getParams(req);
   const taskInfo = new TaskModel({
     lambdaURL: url,
     timeDelayInMs: timeDelay,
@@ -78,21 +83,29 @@ function saveScheduledTask(res, req, url, timeDelay, taskState, task) {
     if (err) {
       console.log(err);
     } else {
-      id = result._id.toString();
+      console.log("successfully updated taskState to scheduled");
+      let id = result._id.toString();
       console.log("id " + id);
+      // schedule the aws lambda task
+      var task = setTimeout(function () {
+        executeAWSLambda(id,url, params);
+      }, timeDelay);
       tasks.set(id, task);
       req.session.message = {
         type: "success",
         intro: "Task Scheduled Successfully",
         message: "please note your taskId for future reference: " + id,
       };
+
+      
+
       res.redirect("/schedule");
     }
   });
 }
 
 //Execute Lambda function
-function executeAWSLambda(url, params) {
+function executeAWSLambda(id,url, params) {
   //update in database taskState to running
   DB.updateTaskState(TaskModel, id, "running");
   axios.post(url, params).then(
@@ -134,43 +147,24 @@ app.get("/", function (req, res) {
 });
 
 app.get("/schedule", function (req, res) {
-  res.render("scheduleTask");
+  res.render("scheduler/scheduleTask");
 });
 
 app.post("/schedule",function (req, res) {
-    const url = req.body.URL;
-    const timeDelay = req.body["timeInMs"];
-    //validating timeDelay(whether it is number or not)
-    let isnum = /^\d+$/.test(timeDelay);
-    if (url.length==0||timeDelay.length==0||!isnum) {
-        console.log('in error');
-      req.session.message = {
-        type: "danger",
-        intro: "Invalid Details",
-        message: "please enter valid URL/Time",
-      };
-      res.redirect("/schedule");
-    } else {
-      
+      const url = req.body.URL;
+      const timeDelay = req.body["timeInMs"];
       const taskState = "Invalid";
       console.log("url: " + url);
       console.log("timeInMs: " + timeDelay);
-      let params = getParams(req);
-      //let id='';
 
-      // schedule the aws lambda task
-      var task = setTimeout(function () {
-        executeAWSLambda(url, params);
-      }, timeDelay);
-
-      //store scheduled task details in database and task to map tasks
-      saveScheduledTask(res, req, url, timeDelay, "scheduled", task);
+      //helper function defined above in app.js
+      saveScheduledTask(res, req, url, timeDelay, "scheduled");
+    
     }
-  }
 );
 
 app.get("/retrieve-task-instances",function(req,res){
-  res.render('retrieveTaskInstances.ejs',{request:'get',results:[]});
+  res.render('scheduler/retrieveTaskInstances',{request:'get',results:[]});
 });
 
 app.post("/retrieve-task-instances",function(req,res){
@@ -181,26 +175,19 @@ app.post("/retrieve-task-instances",function(req,res){
         res.send(err);
      }
      else{
-       res.render('retrieveTaskInstances',{request:'post',results:results});
+       res.render('scheduler/retrieveTaskInstances',{request:'post',results:results});
        //res.send(results);
      }
   })
 });
 
 app.get("/cancel", function (req, res) {
-  res.render("cancelTask");
+  res.render("scheduler/cancelTask");
 });
 
 app.post("/cancel",function (req, res) {
     let taskId = req.body.taskId;
-    if (taskId.length!=24) {
-      req.session.message = {
-        type: "danger",
-        intro: "Invalid Task Id ",
-        message: "Please provide a valid TaskId",
-      };
-    } else {
-      
+
       if (tasks.has(taskId)) {
         
         clearTimeout(tasks.get(taskId));
@@ -219,13 +206,28 @@ app.post("/cancel",function (req, res) {
           message:
             "Task with id " +
             taskId +
-            " is either already executed or not scheduled",
+            " cannot be Deleted!",
         };
       }
-    }
     res.redirect("/cancel");
-  }
-);
+});
+
+/* Authenication routes */
+app.get("/login",function(req,res){
+  res.render('userAuth/login');
+});
+
+app.get("/forgot",function(req,res){
+  res.render("userAuth/forgot");
+});
+
+app.get("/register",function(req,res){
+  res.render("userAuth/register");
+});
+
+app.get("/reset",function(req,res){
+  res.render("userAuth/reset");
+})
 
 /**************************** End of Routes *******************************/
 

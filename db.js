@@ -38,9 +38,9 @@ module.exports.updateTaskState = function (TaskModel, id, taskState) {
     { taskState: taskState },
     function (err, result) {
       if (err) {
-        console.log("could not update");
+        console.log("could not update to taskState "+taskState+" of taskId "+id);
       } else {
-        console.log("successfully updated taskState to: " + taskState);
+        console.log("successfully updated taskState to: " + taskState+" of taskId "+id);
       }
     }
   );
