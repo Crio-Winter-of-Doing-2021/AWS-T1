@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-
+const passportLocalMongoose = require("passport-local-mongoose");
 /*connects to database schedulerDB */
 module.exports.connection = function () {
   //connect with database
@@ -25,11 +25,25 @@ module.exports.connection = function () {
 module.exports.createSchedulerCollection = function () {
   //connection();
   const schedulerCollection = mongoose.Schema({
+    userId: String,
     lambdaURL: String,
     timeDelayInMs: String,
     taskState: String,
   });
   return mongoose.model("task", schedulerCollection);
+};
+
+module.exports.createAuthCollection = function(){
+  const userAuthCollection = mongoose.Schema({
+      username:String,
+      password:String
+  });
+  //enable passportLocalMongoose for auth collection
+  userAuthCollection.plugin(passportLocalMongoose,{
+    incorrectPasswordError: 'incorrectPasswordError',
+    incorrectUsernameError: 'incorrectUsernameError'
+  });
+  return mongoose.model("user",userAuthCollection);
 };
 
 module.exports.updateTaskState = function (TaskModel, id, taskState) {
