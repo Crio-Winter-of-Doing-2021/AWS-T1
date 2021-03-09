@@ -38,6 +38,11 @@ router.get("/reset", function (req, res) {
   }
 });
 
+router.get("/logout",function(req,res){
+    req.logout();
+    res.redirect("/");
+})
+
 router.post("/register", function (req, res) {
   userModel.register(
     { username: req.body.username },

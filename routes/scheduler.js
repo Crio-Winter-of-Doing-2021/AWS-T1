@@ -8,7 +8,7 @@ const router = express.Router();
 const TaskModel = DB.createSchedulerCollection();
 
 //tasks maps taskId with its setTimeout() function call
-let tasks = new Map();
+var tasks = new Map();
 
 /**************************** Scheduler Routes *******************************/
 
@@ -41,87 +41,139 @@ router.get("/cancel", function (req, res) {
 });
 
 router.post("/schedule", function (req, res) {
-  const url = req.body.URL;
-  const timeDelay = req.body["timeInMs"];
-  const taskState = "Invalid";
-  console.log("url: " + url);
-  console.log("timeInMs: " + timeDelay);
+  if (req.isAuthenticated()) {
+    const url = req.body.URL;
+    const timeDelay = req.body["timeInMs"];
+    //get parameters passed with task
+    let params = getParams(req);
+    const taskState = "Invalid";
+    console.log("url: " + url);
+    console.log("timeInMs: " + timeDelay);
+    //parameters passed
+    // console.log("parameters passed");
+    // console.log(JSON.stringify(params));
 
-  //get parameters passed with task
-  let params = getParams(req);
-  //create a task from TaskModel
-  const taskInfo = new TaskModel({
-    username:req.user.username,
-    lambdaURL: url,
-    timeDelayInMs: timeDelay,
-    taskState: taskState,
-  });
-  //save the task in database
-  taskInfo.save(function (err, result) {
-    if (err) {
-      console.log(err);
-      //flash message
-      req.session.message = {
-        type: "Failed",
-        intro: "Could not schedule",
-        message: "please try again",
-      };
-    } else {
-      console.log("successfully updated taskState to scheduled");
-      let id = result._id.toString();
-      console.log("id " + id);
-      // schedule the aws lambda task
-      var task = setTimeout(function () {
-        executeAWSLambda(id, url, params);
-      }, timeDelay);
-      tasks.set(id, task);
-      //flash message
-      req.session.message = {
-        type: "success",
-        intro: "Task Scheduled Successfully",
-        message: "please note your taskId for future reference: " + id,
-      };
-    }
-    res.redirect("/schedule");
-  });
+    //create a task from TaskModel
+    const taskInfo = new TaskModel({
+      username: req.user.username,
+      lambdaURL: url,
+      timeDelayInMs: timeDelay,
+      taskState: taskState,
+    });
+    //save the task in database
+    taskInfo.save(function (err, result) {
+      if (err) {
+        console.log(err);
+        //flash message
+        setFlashMessage(
+          req,
+          "Failed",
+          "Could not schedule",
+          "please try again"
+        );
+      } else {
+        console.log("successfully updated taskState to scheduled");
+        let id = result._id.toString();
+        console.log("id " + id);
+        // schedule the aws lambda task
+        var task = setTimeout(function () {
+          executeAWSLambda(id, url, params);
+        }, timeDelay);
+        tasks.set(id, task);
+        //print tasks map
+        // console.log("tasks map");
+        // for (const [key, value] of tasks.entries()) {
+        //   console.log(key, value);
+        // }
+        //flash message
+        setFlashMessage(
+          req,
+          "success",
+          "Task Scheduled Successfully",
+          "please note your taskId for future reference: " + id
+        );
+      }
+      res.redirect("/schedule");
+    });
+  } else {
+    res.redirect("/login");
+  }
 });
 
 router.post("/retrieve-task-instances", function (req, res) {
-  let taskState = req.body.taskState;
-  TaskModel.find({ taskState: taskState }, function (err, results) {
-    if (err) {
-      res.send(err);
-    } else {
-      res.render("scheduler/retrieveTaskInstances", {
-        request: "post",
-        results: results,
-      });
-      //res.send(results);
-    }
-  });
+  if (req.isAuthenticated()) {
+    let taskState = req.body.taskState;
+    TaskModel.find(
+      { username: req.user.username, taskState: taskState },
+      function (err, results) {
+        if (err) {
+          console.log(err);
+          res.redirect("/retrieve-task-instances");
+        } else {
+          res.render("scheduler/retrieveTaskInstances", {
+            request: "post",
+            results: results,
+          });
+          //res.send(results);
+        }
+      }
+    );
+  } else {
+    res.redirect("/login");
+  }
 });
 
 router.post("/cancel", function (req, res) {
-  let taskId = req.body.taskId;
-
-  if (tasks.has(taskId)) {
-    clearTimeout(tasks.get(taskId));
-    tasks.delete(taskId);
-    //update taskState to cancelled in DB
-    DB.updateTaskState(TaskModel, taskId, "cancelled");
-    req.session.message = {
-      type: "success",
-      intro: "Task Deleted",
-      message: "Task with id " + taskId + " has been deleted successfully",
-    };
+  if (req.isAuthenticated()) {
+    let taskId = req.body.taskId;
+    TaskModel.findById(taskId, function (err, result) {
+      if (err) {
+        //helper function defined below
+        setFlashMessage(req, "danger", "", "Error occured! please try again");
+      } else if (result.length == 0) {
+        setFlashMessage(
+          req,
+          "danger",
+          "",
+          "Task with id " + taskId + " does not exists"
+        );
+      } else {
+        //If task is created by current user
+        if ((result.username === req.user.username)) {
+          //if task is present in tasks map
+          if (tasks.has(taskId)) {
+            clearTimeout(tasks.get(taskId));
+            tasks.delete(taskId);
+            //update taskState to cancelled in DB
+            DB.updateTaskState(TaskModel, taskId, "cancelled");
+            setFlashMessage(
+              req,
+              "success",
+              "",
+              "Task with id " + taskId + " successfully deleted!"
+            );
+          } else {
+            setFlashMessage(
+              req,
+              "danger",
+              "",
+              "Task with id " + taskId + " cannot be Deleted!"
+            );
+          }
+        } else {
+          setFlashMessage(
+            req,
+            "danger",
+            "Not scheduled",
+            "You have not scheduled Task with id " + taskId
+          );
+        }
+      }
+      res.redirect("/cancel");
+    });
   } else {
-    req.session.message = {
-      type: "danger",
-      intro: "",
-      message: "Task with id " + taskId + " cannot be Deleted!",
-    };
+    res.redirect("/login");
   }
-  res.redirect("/cancel");
 });
 
 /**************************** End Scheduler Routes *******************************/
@@ -151,7 +203,16 @@ function getParams(req) {
   return params;
 }
 
-
+/*
+  sets flash message
+*/
+function setFlashMessage(req, type, intro, message) {
+  req.session.message = {
+    type: type,
+    intro: intro,
+    message: message,
+  };
+}
 
 //Execute Lambda function
 function executeAWSLambda(id, url, params) {
@@ -168,6 +229,8 @@ function executeAWSLambda(id, url, params) {
         console.log("successfully executed lambda");
         console.log("Response after execution");
         console.log(response);
+      } else {
+        console.log("There is no task with taskId " + id);
       }
     },
     (error) => {
@@ -178,6 +241,8 @@ function executeAWSLambda(id, url, params) {
         DB.updateTaskState(TaskModel, id, "failed");
         console.log("error occured while executing task");
         console.log(error);
+      } else {
+        console.log("There is no task with taskId " + id);
       }
     }
   );
