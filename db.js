@@ -2,7 +2,6 @@ const mongoose = require("mongoose");
 const passportLocalMongoose = require("passport-local-mongoose");
 /*connects to database schedulerDB */
 module.exports.connection = function () {
-  //connect with database
   mongoose.connect("mongodb://localhost:27017/schedulerDB", {
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -25,7 +24,7 @@ module.exports.connection = function () {
 module.exports.createSchedulerCollection = function () {
   //connection();
   const schedulerCollection = mongoose.Schema({
-    userId: String,
+    username: String,
     lambdaURL: String,
     timeDelayInMs: String,
     taskState: String,
@@ -33,17 +32,17 @@ module.exports.createSchedulerCollection = function () {
   return mongoose.model("task", schedulerCollection);
 };
 
-module.exports.createAuthCollection = function(){
+module.exports.createUsersCollection = function () {
   const userAuthCollection = mongoose.Schema({
-      username:String,
-      password:String
+    username: String,
+    password: String,
   });
   //enable passportLocalMongoose for auth collection
-  userAuthCollection.plugin(passportLocalMongoose,{
-    incorrectPasswordError: 'incorrectPasswordError',
-    incorrectUsernameError: 'incorrectUsernameError'
+  userAuthCollection.plugin(passportLocalMongoose, {
+    incorrectPasswordError: "incorrectPasswordError",
+    incorrectUsernameError: "incorrectUsernameError",
   });
-  return mongoose.model("user",userAuthCollection);
+  return mongoose.model("user", userAuthCollection);
 };
 
 module.exports.updateTaskState = function (TaskModel, id, taskState) {
@@ -52,24 +51,15 @@ module.exports.updateTaskState = function (TaskModel, id, taskState) {
     { taskState: taskState },
     function (err, result) {
       if (err) {
-        console.log("could not update to taskState "+taskState+" of taskId "+id);
+        console.log(
+          "could not update to taskState " + taskState + " of taskId " + id
+        );
       } else {
-        console.log("successfully updated taskState to: " + taskState+" of taskId "+id);
+        console.log(
+          "successfully updated taskState to: " + taskState + " of taskId " + id
+        );
       }
     }
   );
-  // var action=function(err,collection)
-  // {
-
-  //     collection.updateOne({ _id:id },{ $set:{taskState:taskState }
-  //     });
-  // }
-  // //await Task.updateOne({ _id:id },{ $set: { taskState: taskState }});
-  // mongoose.connection.db.collection('tasks',action);
 };
 
-//connect to database
-//this.connection();
-
-//create or return a pre-created scheduler collection
-// const Task = this.createSchedulerCollection();
