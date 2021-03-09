@@ -130,7 +130,7 @@ router.post("/cancel", function (req, res) {
       if (err) {
         //helper function defined below
         setFlashMessage(req, "danger", "", "Error occured! please try again");
-      } else if (result.length == 0) {
+      } else if (result==null) {
         setFlashMessage(
           req,
           "danger",
