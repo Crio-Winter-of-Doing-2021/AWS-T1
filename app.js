@@ -1,5 +1,6 @@
 const express = require("express");
 const session = require("express-session");
+const flash = require("connect-flash");
 const userRouter = require("./routes/user.js");
 const schedulerRouter = require("./routes/scheduler.js");
 const DB = require(__dirname + "/db.js");
@@ -10,7 +11,7 @@ app.set("view engine", "ejs");
 app.set("views", __dirname + "/views");
 
 app.use(express.static("public"));
-
+app.use(flash());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 

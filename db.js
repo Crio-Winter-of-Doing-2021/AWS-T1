@@ -38,10 +38,7 @@ module.exports.createUsersCollection = function () {
     password: String,
   });
   //enable passportLocalMongoose for auth collection
-  userAuthCollection.plugin(passportLocalMongoose, {
-    incorrectPasswordError: "incorrectPasswordError",
-    incorrectUsernameError: "incorrectUsernameError",
-  });
+  userAuthCollection.plugin(passportLocalMongoose);
   return mongoose.model("user", userAuthCollection);
 };
 
