@@ -46,7 +46,7 @@ router.post("/schedule", function (req, res) {
     const timeDelay = req.body["timeInMs"];
     //get parameters passed with task
     let params = getParams(req);
-    const taskState;
+    const taskState="";
     console.log("url: " + url);
     console.log("timeInMs: " + timeDelay);
     //parameters passed
