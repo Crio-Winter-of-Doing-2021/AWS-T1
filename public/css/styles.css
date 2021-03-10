@@ -1,7 +1,15 @@
 /* need to make it responsive (add media queries)*/
-body{
+/* body{
     background-color: #f5f5f5;
     
+} */
+
+/* background image */
+.backgroundImage{
+    background-image: url(https://c0.wallpaperflare.com/preview/917/466/412/clock-time-time-management-time-of.jpg);
+    background-repeat: no-repeat;  
+    background-size: cover;
+    background-position: 50% 50%;
 }
 .wrapper{
     margin-top:5%;
@@ -74,7 +82,7 @@ label{
 
 
 .retrievedTasks{
-    height:400px;
+    height:300px;
     overflow-y:auto;
     overflow-x: auto;
     margin-left:40%;
@@ -95,7 +103,7 @@ label{
     }
 
     .retrievedTasks{
-        height:300px;
+        height:200px;
         overflow-y:auto;
         overflow-x: auto;
         margin-left:20%;

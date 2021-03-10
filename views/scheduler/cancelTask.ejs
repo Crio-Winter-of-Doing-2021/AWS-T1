@@ -13,6 +13,7 @@
     <title>cancel Task</title>
   </head>
   <body>
+    <%- include('../partials/navbar.ejs'); %>
     <% if(message){ %>
     <div style="text-align: center" class="alert alert-<%=message.type%>">
       <button type="button" class="close" data-dismiss="alert">&times;</button>

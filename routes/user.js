@@ -17,6 +17,14 @@ passport.use(userModel.createStrategy());
 passport.serializeUser(userModel.serializeUser());
 passport.deserializeUser(userModel.deserializeUser());
 
+
+//middle-ware for checking if user is logged in
+router.use(function(req,res,next){ 
+  res.locals.login = req.isAuthenticated(); 
+  res.locals.user = req.user; 
+  next(); 
+});
+
 /* Authenication routes */
 router.get("/login", function (req, res) {
   res.render("userAuth/login", { loginMessage: req.flash("error") });
@@ -32,7 +40,7 @@ router.get("/forgot", function (req, res) {
 
 router.get("/reset", function (req, res) {
   if (req.isAuthenticated()) {
-    res.render("userAuth/reset");
+    res.render("userAuth/reset",{resetMessage:null,type:null});
   } else {
     res.redirect("/login");
   }
@@ -75,5 +83,30 @@ router.post(
     failureFlash: true,
   })
 );
+
+router.post("/reset",function(req,res){
+  userModel.find({username:req.user.username},function(err,result){
+    if(err)
+    {
+      res.render("userAuth/reset",{resetMessage:'error! Please try again!!'
+      ,type:'danger'});
+    }
+    else{
+      var user = result[0];
+      user.changePassword(req.body.oldPassword,req.body.newPassword, function (err, result) { 
+        if (err){ 
+            console.log(err);
+            res.render("userAuth/reset",{resetMessage:'error! Please try again!!'
+            ,type:'danger'});
+        } 
+        else{ 
+            res.render("userAuth/reset",{resetMessage:"password updated successfully!"
+            ,type:'success'}); 
+        } 
+    }); 
+    }
+  })
+  
+});
 
 module.exports = router;
