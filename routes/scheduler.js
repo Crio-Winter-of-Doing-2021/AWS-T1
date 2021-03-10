@@ -46,7 +46,7 @@ router.post("/schedule", function (req, res) {
     const timeDelay = req.body["timeInMs"];
     //get parameters passed with task
     let params = getParams(req);
-    const taskState = "Invalid";
+    const taskState;
     console.log("url: " + url);
     console.log("timeInMs: " + timeDelay);
     //parameters passed
@@ -58,7 +58,7 @@ router.post("/schedule", function (req, res) {
       username: req.user.username,
       lambdaURL: url,
       timeDelayInMs: timeDelay,
-      taskState: taskState,
+      taskState: "scheduled",
     });
     //save the task in database
     taskInfo.save(function (err, result) {
