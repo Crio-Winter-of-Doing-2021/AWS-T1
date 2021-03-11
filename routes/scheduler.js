@@ -1,5 +1,5 @@
 const express = require("express");
-const axios = require("axios");
+const utils = require("../utility_functions/schedulerUtils.js");
 const DB = require("../db.js");
 
 const router = express.Router();
@@ -8,7 +8,10 @@ const router = express.Router();
 const TaskModel = DB.createSchedulerCollection();
 
 //tasks maps taskId with its setTimeout() function call
-var tasks = new Map();
+let tasks = new Map();
+
+module.exports.TaskModel = TaskModel;
+module.exports.tasks = tasks;
 
 /**************************** Scheduler Routes *******************************/
 
@@ -45,7 +48,7 @@ router.post("/schedule", function (req, res) {
     const url = req.body.URL;
     const timeDelay = req.body["timeInMs"];
     //get parameters passed with task
-    let params = getParams(req);
+    let params = utils.getParams(req);
     const taskState="";
     console.log("url: " + url);
     console.log("timeInMs: " + timeDelay);
@@ -65,7 +68,7 @@ router.post("/schedule", function (req, res) {
       if (err) {
         console.log(err);
         //flash message
-        setFlashMessage(
+        utils.setFlashMessage(
           req,
           "Failed",
           "Could not schedule",
@@ -77,7 +80,7 @@ router.post("/schedule", function (req, res) {
         console.log("id " + id);
         // schedule the aws lambda task
         var task = setTimeout(function () {
-          executeAWSLambda(id, url, params);
+          utils.executeAWSLambda(id, url, params);
         }, timeDelay);
         tasks.set(id, task);
         //print tasks map
@@ -86,7 +89,7 @@ router.post("/schedule", function (req, res) {
         //   console.log(key, value);
         // }
         //flash message
-        setFlashMessage(
+        utils.setFlashMessage(
           req,
           "success",
           "Task Scheduled Successfully",
@@ -129,9 +132,9 @@ router.post("/cancel", function (req, res) {
     TaskModel.findById(taskId, function (err, result) {
       if (err) {
         //helper function defined below
-        setFlashMessage(req, "danger", "", "Error occured! please try again");
+        utils.setFlashMessage(req, "danger", "", "Error occured! please try again");
       } else if (result==null) {
-        setFlashMessage(
+        utils.setFlashMessage(
           req,
           "danger",
           "",
@@ -146,14 +149,14 @@ router.post("/cancel", function (req, res) {
             tasks.delete(taskId);
             //update taskState to cancelled in DB
             DB.updateTaskState(TaskModel, taskId, "cancelled");
-            setFlashMessage(
+            utils.setFlashMessage(
               req,
               "success",
               "",
               "Task with id " + taskId + " successfully deleted!"
             );
           } else {
-            setFlashMessage(
+            utils.setFlashMessage(
               req,
               "danger",
               "",
@@ -161,7 +164,7 @@ router.post("/cancel", function (req, res) {
             );
           }
         } else {
-          setFlashMessage(
+          utils.setFlashMessage(
             req,
             "danger",
             "Not scheduled",
@@ -178,76 +181,6 @@ router.post("/cancel", function (req, res) {
 
 /**************************** End Scheduler Routes *******************************/
 
-/*********************** helper functions ************************/
 
-//retrieves parameters passed with the scheduled task in endpoint /schedule
-function getParams(req) {
-  let ind = 0;
-  var params = [];
-  let checkbox = req.body.checkbox0;
-  while (typeof checkbox != "undefined") {
-    let temp = "";
-    if (checkbox == "on") {
-      temp = "key" + ind;
-      const key = req.body[temp];
-      temp = "value" + ind;
-      const value = req.body[temp];
-      if (key != "" || value != "") {
-        params.push({ key, value });
-      }
-    }
-    ind++;
-    temp = "checkbox" + ind;
-    checkbox = req.body[temp];
-  }
-  return params;
-}
-
-/*
-  sets flash message
-*/
-function setFlashMessage(req, type, intro, message) {
-  req.session.message = {
-    type: type,
-    intro: intro,
-    message: message,
-  };
-}
-
-//Execute Lambda function
-function executeAWSLambda(id, url, params) {
-  //update in database taskState to running
-  DB.updateTaskState(TaskModel, id, "running");
-  axios.post(url, params).then(
-    (response) => {
-      //edge case: immediately executing tasks i.e timeDelay 0ms
-      if (tasks.has(id)) {
-        //update in database taskState to completed
-        DB.updateTaskState(TaskModel, id, "completed");
-        console.log("Task " + id + "  deleted succefully from map tasks");
-        tasks.delete(id);
-        console.log("successfully executed lambda");
-        console.log("Response after execution");
-        console.log(response);
-      } else {
-        console.log("There is no task with taskId " + id);
-      }
-    },
-    (error) => {
-      if (tasks.has(id)) {
-        console.log("Task " + id + "  deleted succefully from map tasks");
-        tasks.delete(id);
-        //update in database taskState to failed
-        DB.updateTaskState(TaskModel, id, "failed");
-        console.log("error occured while executing task");
-        console.log(error);
-      } else {
-        console.log("There is no task with taskId " + id);
-      }
-    }
-  );
-}
-
-/********************* end helper functions ***************************/
 
 module.exports = router;
