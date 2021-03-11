@@ -48,12 +48,15 @@ label{
 /* beginning table styles */
 
 .styled-table {
+    overflow-y: auto;
+    overflow-x: auto;
     border-collapse: collapse;
-    margin: 25px 0;
+    margin: 0 auto;
     font-size: 0.9em;
     font-family: sans-serif;
     min-width: 400px;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+
 }
 .styled-table thead tr {
     background-color: #009879;
@@ -81,11 +84,12 @@ label{
 /* end of table styles */
 
 
-.retrievedTasks{
-    height:300px;
+.tableContainer{
+    height:400px;
     overflow-y:auto;
     overflow-x: auto;
-    margin-left:40%;
+    margin-left:5%;
+    margin-right: 5%;
 }
 
 /* ---------------------------------------------------
@@ -102,10 +106,12 @@ label{
         margin-bottom: 30px;
     }
 
-    .retrievedTasks{
-        height:200px;
+    .tableContainer{
+        height:300px;
         overflow-y:auto;
         overflow-x: auto;
-        margin-left:20%;
+        margin-left:5%;
+        margin-right: 5%;
+        /* margin: 0 auto; */
     }
 }

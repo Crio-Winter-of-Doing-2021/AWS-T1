@@ -1,66 +1,80 @@
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="/images/logo.jpg" type="image/x-icon" />
 
-    <!-- include libraries.ejs -->
-    <%- include('../partials/libraries.ejs') %>
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="/images/logo.jpg" type="image/x-icon" />
+
+  <!-- include libraries.ejs -->
+  <%- include('../partials/libraries.ejs') %>
 
     <!-- custom css -->
     <link rel="stylesheet" href="/css/styles.css" />
-    
+
     <title>Retrieve Task Instances</title>
 </head>
+
 <body>
   <%- include('../partials/navbar.ejs'); %>
     <div class="wrapper">
-        <h1 class="display-3 heading">Retrieve Tasks</h1>
-        <form action="" method="POST" id="retrieveTasks">
+      <h1 class="display-3 heading">Retrieve Tasks</h1>
+      <form action="" method="POST" id="retrieveTasks">
 
-          <div class="form-group">
-            <label for="taskInstance">Select Task Instance</label>
-            <input type="text" class="form-control"  name="taskState" list="states" placeholder="e.g. completed" required>
-            <datalist id="states">
-                <option value="completed">
-                <option value="running">
-                <option value="scheduled">
-                <option value="cancelled">
-                <option value="failed">
-            </datalist>
-          </div>
-          <button type="submit" class="btn btn-primary button">
-            Retrieve Tasks
-          </button>
-        </form>
-      </div>
+        <div class="form-group">
+          <label for="taskInstance">Select Task Instance</label>
+          <input type="text" class="form-control" name="taskState" list="states" placeholder="e.g. completed" required>
+          <datalist id="states">
+            <option value="completed">
+            <option value="running">
+            <option value="scheduled">
+            <option value="cancelled">
+            <option value="failed">
+          </datalist>
+        </div>
+        <button type="submit" class="btn btn-primary button">
+          Retrieve Tasks
+        </button>
+      </form>
+    </div>
+
+    <%if(taskInstance!=""){%>
+      <!-- retrieve tasks with provided task States -->
       
-        <%if(request=="post"){%>
-          <!-- retrieve tasks with provided task States -->
-      <div class="wrapper retrievedTasks">
-        <table class="styled-table">
+        <div class="tableContainer">
+        <h2 style="text-align: center; padding-top: 30px; color:brown";><%=taskInstance%> Tasks</h2>
+        <table class="styled-table" style="margin:0 auto;">
           <thead>
-              <tr>
-                  <th>Task Id</th>
-                  <th>Task State</th>
-              </tr>
+            <tr>
+              <th>Task Id</th>
+              <th>URL</th>
+              <th>Data Passed</th>
+            </tr>
           </thead>
           <tbody>
-              <%for(var i=0;i<results.length;i++){%>
-                <tr>
-                  <td><%=results[i]._id%></td>
-                  <td><%=results[i].taskState%></td>
+            <%for(var i=0;i<results.length;i++){%>
+              <tr>
+                <td>
+                  <%=results[i]._id%>
+                </td>
+                <td>
+                  <%=results[i].lambdaURL%>
+                </td>
+                <td>
+                  <%=results[i].parameters%>
+                </td>
               </tr>
               <%}%>
-              <!-- and so on... -->
+                <!-- and so on... -->
           </tbody>
-      </table>
+        </table>
       </div>
       <%}%>
-      <script>
-        $("#retrieveTasks").validate();
-      </script> 
-      
+   
+        <script>
+          $("#retrieveTasks").validate();
+        </script>
+
 </body>
+
 </html>

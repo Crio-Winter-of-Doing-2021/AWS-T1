@@ -10,6 +10,7 @@ const TaskModel = DB.createSchedulerCollection();
 //tasks maps taskId with its setTimeout() function call
 let tasks = new Map();
 
+//export TaskModel and tasks for use in other files
 module.exports.TaskModel = TaskModel;
 module.exports.tasks = tasks;
 
@@ -27,7 +28,7 @@ router.get("/schedule", function (req, res) {
 router.get("/retrieve-task-instances", function (req, res) {
   if (req.isAuthenticated()) {
     res.render("scheduler/retrieveTaskInstances", {
-      request: "get",
+      taskInstance: "",
       results: [],
     });
   } else {
@@ -43,24 +44,46 @@ router.get("/cancel", function (req, res) {
   }
 });
 
+router.get("/retrieve-all-tasks", function (req, res) {
+  if (req.isAuthenticated()) {
+    TaskModel.find({ username: req.user.username }, function (err, results) {
+      if (err) {
+        console.log(err);
+        res.redirect("/retrieve-all-tasks");
+      } else {
+        res.render("scheduler/retrieveAllTasks", {
+          results: results,
+        });
+        //res.send(results);
+      }
+    });
+  } else {
+    res.redirect("/login");
+  }
+});
+
 router.post("/schedule", function (req, res) {
   if (req.isAuthenticated()) {
     const url = req.body.URL;
     const timeDelay = req.body["timeInMs"];
+
     //get parameters passed with task
     let params = utils.getParams(req);
-    const taskState="";
+    const taskState = "";
     console.log("url: " + url);
     console.log("timeInMs: " + timeDelay);
-    //parameters passed
-    // console.log("parameters passed");
-    // console.log(JSON.stringify(params));
 
+    //create a JSON object out of params to store in db as JSON string
+    let data = {};
+    for (var i = 0; i < params.length; i++) {
+      data[params[i].key] = params[i].value;
+    }
     //create a task from TaskModel
     const taskInfo = new TaskModel({
       username: req.user.username,
       lambdaURL: url,
       timeDelayInMs: timeDelay,
+      parameters: JSON.stringify(data),
       taskState: "scheduled",
     });
     //save the task in database
@@ -114,7 +137,7 @@ router.post("/retrieve-task-instances", function (req, res) {
           res.redirect("/retrieve-task-instances");
         } else {
           res.render("scheduler/retrieveTaskInstances", {
-            request: "post",
+            taskInstance: taskState,
             results: results,
           });
           //res.send(results);
@@ -132,8 +155,13 @@ router.post("/cancel", function (req, res) {
     TaskModel.findById(taskId, function (err, result) {
       if (err) {
         //helper function defined below
-        utils.setFlashMessage(req, "danger", "", "Error occured! please try again");
-      } else if (result==null) {
+        utils.setFlashMessage(
+          req,
+          "danger",
+          "",
+          "Error occured! please try again"
+        );
+      } else if (result == null) {
         utils.setFlashMessage(
           req,
           "danger",
@@ -142,7 +170,7 @@ router.post("/cancel", function (req, res) {
         );
       } else {
         //If task is created by current user
-        if ((result.username === req.user.username)) {
+        if (result.username === req.user.username) {
           //if task is present in tasks map
           if (tasks.has(taskId)) {
             clearTimeout(tasks.get(taskId));
@@ -180,7 +208,5 @@ router.post("/cancel", function (req, res) {
 });
 
 /**************************** End Scheduler Routes *******************************/
-
-
 
 module.exports = router;

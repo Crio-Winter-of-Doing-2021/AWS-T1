@@ -1,0 +1,53 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/images/logo.jpg" type="image/x-icon" />
+
+    <!-- include libraries.ejs -->
+    <%- include('../partials/libraries.ejs') %>
+
+        <!-- custom css -->
+        <link rel="stylesheet" href="/css/styles.css" />
+
+        <title>Retrieve All Tasks</title>
+</head>
+
+<body>
+    <%- include('../partials/navbar.ejs'); %>
+    <div class="tableContainer" style="height: fit-content; margin-top:40px">
+        <table class="styled-table">
+            <thead>
+                <tr>
+                    <th>Task Id</th>
+                    <th>URL</th>
+                    <th>Task State</th>
+                    <th>Data Passed</th>
+                </tr>
+            </thead>
+            <tbody>
+                <%for(var i=0;i<results.length;i++){%>
+                    <tr>
+                        <td>
+                            <%=results[i]._id%>
+                        </td>
+                        <td>
+                            <%=results[i].lambdaURL%>
+                        </td>
+                        <td>
+                            <%=results[i].taskState%>
+                        </td>
+                        <td>
+                            <%=results[i].parameters%>
+                        </td>
+                    </tr>
+                    <%}%>
+                        
+            </tbody>
+        </table>
+    </div>
+</body>
+
+</html>

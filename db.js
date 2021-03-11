@@ -27,6 +27,7 @@ module.exports.createSchedulerCollection = function () {
     username: String,
     lambdaURL: String,
     timeDelayInMs: String,
+    parameters:String,
     taskState: String,
   });
   return mongoose.model("task", schedulerCollection);
@@ -59,4 +60,3 @@ module.exports.updateTaskState = function (TaskModel, id, taskState) {
     }
   );
 };
-
