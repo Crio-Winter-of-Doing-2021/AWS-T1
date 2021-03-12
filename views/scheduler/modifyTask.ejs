@@ -1,0 +1,67 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="/images/logo.jpg" type="image/x-icon" />
+
+    <!-- including cdn of libraries -->
+    <%- include('../partials/libraries.ejs'); %>
+
+    <!-- custom css -->
+    <link rel="stylesheet" href="/css/styles.css" />
+    <title>Modify Task</title>
+  </head>
+  <body>
+    <%- include('../partials/navbar.ejs'); %>
+    <% if(message){ %>
+    <div style="text-align: center" class="alert alert-<%=message.type%>">
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+      <strong><%=message.intro%></strong> <%=message.message%>
+    </div>
+    <% } %>
+    <div class="wrapper">
+      <h1 class="display-3 heading">Modify Task</h1>
+      <form action="" method="POST" id="cancelTaskForm">
+        <div class="form-group">
+          <label for="taskId">TaskId</label>
+          <input
+            type="text"
+            id="ream"
+            class="form-control"
+            name="taskId"
+            placeholder="Enter Task Id"
+            minlength="24"
+            maxlength="24"
+            required
+          />
+        </div>
+
+        <!-- Time Delay -->
+        <div class="form-group">
+            <label for="delayTime">TimeInMs</label>
+            <input
+              class="form-control"
+              name="timeInMs"
+              placeholder="Time in Millisecond"
+              type="number"
+              required
+            />
+            <div class="invalid-feedback">
+              Invalid Time Delay
+            </div>
+            <small id="emailHelp" class="form-text text-muted">Provide Scheduling Time from the Present Moment.</small>
+          </div>
+          <!-- end of time delay -->
+
+        <button type="submit" class="btn btn-primary button">
+          Modify Task
+        </button>
+      </form>
+    </div>
+    <script>
+      $("#cancelTaskForm").validate();
+    </script>
+    
+  </body>
+</html>

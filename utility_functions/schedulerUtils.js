@@ -56,19 +56,19 @@ module.exports.executeAWSLambda = function (id, url, params) {
         console.log("Response after execution");
         console.log(response);
       } else {
-        console.log("There is no task with taskId " + id);
+        console.log("Task with taskId " + id + " could not be executed");
       }
     },
     (error) => {
       if (tasks.has(id)) {
-        console.log("Task " + id + "  deleted succefully from map tasks");
         tasks.delete(id);
+        console.log("Task " + id + "  deleted succefully from map tasks");
         //update in database taskState to failed
         DB.updateTaskState(TaskModel, id, "failed");
         console.log("error occured while executing task");
         console.log(error);
       } else {
-        console.log("There is no task with taskId " + id);
+        console.log("Task with taskId " + id + " could not be executed");
       }
     }
   );

@@ -10,7 +10,10 @@ const TaskModel = DB.createSchedulerCollection();
 //tasks maps taskId with its setTimeout() function call
 let tasks = new Map();
 
-//export TaskModel and tasks for use in other files
+//maps taskId with an object containing its lambda-url and paramaters
+let taskDetails = new Map();
+
+//export TaskModel and tasks for use in other files(utils.js)
 module.exports.TaskModel = TaskModel;
 module.exports.tasks = tasks;
 
@@ -44,6 +47,14 @@ router.get("/cancel", function (req, res) {
   }
 });
 
+router.get("/modify",function(req,res){
+  if (req.isAuthenticated()) {
+    res.render("scheduler/modifyTask");
+  } else {
+    res.redirect("/login");
+  }
+});
+
 router.get("/retrieve-all-tasks", function (req, res) {
   if (req.isAuthenticated()) {
     TaskModel.find({ username: req.user.username }, function (err, results) {
@@ -54,7 +65,6 @@ router.get("/retrieve-all-tasks", function (req, res) {
         res.render("scheduler/retrieveAllTasks", {
           results: results,
         });
-        //res.send(results);
       }
     });
   } else {
@@ -98,9 +108,11 @@ router.post("/schedule", function (req, res) {
           "please try again"
         );
       } else {
-        console.log("successfully updated taskState to scheduled");
+        
         let id = result._id.toString();
-        console.log("id " + id);
+        console.log("successfully updated taskState to scheduled of task with id "+id);
+        //store task details in taskDetails map
+        taskDetails.set(id,{url:url,params:params});
         // schedule the aws lambda task
         var task = setTimeout(function () {
           utils.executeAWSLambda(id, url, params);
@@ -111,7 +123,7 @@ router.post("/schedule", function (req, res) {
         // for (const [key, value] of tasks.entries()) {
         //   console.log(key, value);
         // }
-        //flash message
+        //flash message(utility function present in schdulerUtils.js)
         utils.setFlashMessage(
           req,
           "success",
@@ -140,7 +152,6 @@ router.post("/retrieve-task-instances", function (req, res) {
             taskInstance: taskState,
             results: results,
           });
-          //res.send(results);
         }
       }
     );
@@ -152,6 +163,65 @@ router.post("/retrieve-task-instances", function (req, res) {
 router.post("/cancel", function (req, res) {
   if (req.isAuthenticated()) {
     let taskId = req.body.taskId;
+    TaskModel.findById(taskId, function (err, result) {
+      if (err) {
+        utils.setFlashMessage(
+          req,
+          "danger",
+          "",
+          "Error occured! please try again"
+        );
+      } else if (result == null) {
+        utils.setFlashMessage(
+          req,
+          "danger",
+          "Task not found",
+          "Task with id " + taskId + " does not exists"
+        );
+      } else {
+        //If task is created by current user
+        if (result.username === req.user.username) {
+          //if task is present in tasks map
+          if (tasks.has(taskId)) {
+            clearTimeout(tasks.get(taskId));
+            tasks.delete(taskId);
+            taskDetails.delete(taskId);
+            //update taskState to cancelled in DB
+            DB.updateTaskState(TaskModel, taskId, "cancelled");
+            utils.setFlashMessage(
+              req,
+              "success",
+              "",
+              "Task with id " + taskId + " successfully deleted!"
+            );
+          } else {
+            utils.setFlashMessage(
+              req,
+              "danger",
+              "Failed",
+              "Task with id " + taskId + " cannot be Deleted. It has executed already."
+            );
+          }
+        } else {
+          utils.setFlashMessage(
+            req,
+            "danger",
+            "unauthorised",
+            "Task with id " + taskId+" is not scheduled by you."
+          );
+        }
+      }
+      res.redirect("/cancel");
+    });
+  } else {
+    res.redirect("/login");
+  }
+});
+
+router.post("/modify",function(req,res){
+  if (req.isAuthenticated()) {
+    let taskId = req.body.taskId;
+   
     TaskModel.findById(taskId, function (err, result) {
       if (err) {
         //helper function defined below
@@ -171,40 +241,52 @@ router.post("/cancel", function (req, res) {
       } else {
         //If task is created by current user
         if (result.username === req.user.username) {
-          //if task is present in tasks map
+          //if task is present in tasks map i.e task is in scheduled state
           if (tasks.has(taskId)) {
+            //retrieve task details from taskDetails map 
+            let timeDelay = req.body.timeInMs;
+            let url = taskDetails.get(taskId).url;
+            let params = taskDetails.get(taskId).params;
+            console.log(url);
+            console.log(JSON.stringify(params));
+            //cancel previously scheduled task
             clearTimeout(tasks.get(taskId));
-            tasks.delete(taskId);
-            //update taskState to cancelled in DB
-            DB.updateTaskState(TaskModel, taskId, "cancelled");
+            // schedule a new aws lambda task with same url and params as previous task
+            var task = setTimeout(function () {
+              utils.executeAWSLambda(taskId, url, params);
+            }, timeDelay);
+            //update tasks map with the new task
+            tasks.set(taskId, task);
+            console.log("successfully modified task with "+taskId+" to timedelay "+timeDelay);
             utils.setFlashMessage(
               req,
               "success",
               "",
-              "Task with id " + taskId + " successfully deleted!"
+              "Task with id " + taskId + " successfully modified!"
             );
           } else {
             utils.setFlashMessage(
               req,
               "danger",
-              "",
-              "Task with id " + taskId + " cannot be Deleted!"
+              "Failed",
+              "Task with id " + taskId + " cannot be Modified.It has executed already."
             );
           }
         } else {
           utils.setFlashMessage(
             req,
             "danger",
-            "Not scheduled",
-            "You have not scheduled Task with id " + taskId
+            "Unauthorised",
+            "Task with id " + taskId+" is not scheduled by you."
           );
         }
       }
-      res.redirect("/cancel");
+      res.redirect("/modify");
     });
   } else {
     res.redirect("/login");
   }
+
 });
 
 /**************************** End Scheduler Routes *******************************/
