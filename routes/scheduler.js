@@ -82,18 +82,14 @@ router.post("/schedule", function (req, res) {
     const taskState = "";
     console.log("url: " + url);
     console.log("timeInMs: " + timeDelay);
-
-    //create a JSON object out of params to store in db as JSON string
-    let data = {};
-    for (var i = 0; i < params.length; i++) {
-      data[params[i].key] = params[i].value;
-    }
+    
+    
     //create a task from TaskModel
     const taskInfo = new TaskModel({
       username: req.user.username,
       lambdaURL: url,
       timeDelayInMs: timeDelay,
-      parameters: JSON.stringify(data),
+      parameters: JSON.stringify(params),
       taskState: "scheduled",
     });
     //save the task in database
@@ -198,15 +194,15 @@ router.post("/cancel", function (req, res) {
             utils.setFlashMessage(
               req,
               "danger",
-              "Failed",
-              "Task with id " + taskId + " cannot be Deleted. It has executed already."
+              "Already Executed",
+              "Task with id " + taskId + " cannot be Deleted."
             );
           }
         } else {
           utils.setFlashMessage(
             req,
             "danger",
-            "unauthorised",
+            "Unauthorised",
             "Task with id " + taskId+" is not scheduled by you."
           );
         }
@@ -235,7 +231,7 @@ router.post("/modify",function(req,res){
         utils.setFlashMessage(
           req,
           "danger",
-          "",
+          "Task Not Found",
           "Task with id " + taskId + " does not exists"
         );
       } else {
@@ -268,8 +264,8 @@ router.post("/modify",function(req,res){
             utils.setFlashMessage(
               req,
               "danger",
-              "Failed",
-              "Task with id " + taskId + " cannot be Modified.It has executed already."
+              "Already Executed",
+              "Task with id " + taskId + " cannot be Modified."
             );
           }
         } else {

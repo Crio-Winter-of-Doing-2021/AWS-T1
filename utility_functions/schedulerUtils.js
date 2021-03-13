@@ -24,7 +24,12 @@ module.exports.getParams = function (req) {
     temp = "checkbox" + ind;
     checkbox = req.body[temp];
   }
-  return params;
+  //create a JSON object out of params to store in db as JSON string
+  let data = {};
+  for (var i = 0; i < params.length; i++) {
+    data[params[i].key] = params[i].value;
+  }
+  return data;
 };
 
 /*
@@ -44,7 +49,9 @@ module.exports.executeAWSLambda = function (id, url, params) {
   let tasks = scheduler.tasks;
   //update in database taskState to running
   DB.updateTaskState(TaskModel, id, "running");
-  axios.post(url, params).then(
+  axios.get(url, {
+    params:params
+  }).then(
     (response) => {
       //edge case: immediately executing tasks i.e timeDelay 0ms
       if (tasks.has(id)) {
