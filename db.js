@@ -26,7 +26,6 @@ module.exports.createSchedulerCollection = function () {
   const schedulerCollection = mongoose.Schema({
     username: String,
     lambdaURL: String,
-    timeDelayInMs: String,
     parameters:String,
     taskState: String,
   });

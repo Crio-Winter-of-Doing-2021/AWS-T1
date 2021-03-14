@@ -77,18 +77,12 @@
 
         <!-- Time Delay -->
         <div class="form-group">
-          <label for="delayTime">TimeInMs</label>
-          <input
-            class="form-control"
-            name="timeInMs"
-            placeholder="Time in Millisecond"
-            type="number"
-            required
-          />
-          <small id="emailHelp" class="form-text text-muted">Provide Scheduling Time from the Present Moment.</small>
-          <div class="invalid-feedback">
-            Invalid Time Delay
+          <label for="delayTime">Scheduling Time</label>
+          <div >
+            <input id="datefield" name='datefield' type='date' min='2021-01-01' max='2030-12-13' required></input>
+            <input type="time" id="timefield" name="timefield"  required>
           </div>
+          <small id="timeHelp" class="form-text text-muted">Task can be scheduled to atmost 24 days later starting from present</small>
         </div>
         <!-- end of time delay -->
 
@@ -98,5 +92,6 @@
       </form>
     </div>
     <script src="js/schedule.js"></script>
+    <script src="js/timeUtils.js"></script>
   </body>
 </html>

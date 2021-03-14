@@ -75,20 +75,29 @@ router.get("/retrieve-all-tasks", function (req, res) {
 router.post("/schedule", function (req, res) {
   if (req.isAuthenticated()) {
     const url = req.body.URL;
-    const timeDelay = req.body["timeInMs"];
-
+    const scheduledDate = req.body.datefield;
+    const scheduledTime = req.body.timefield;
     //get parameters passed with task
     let params = utils.getParams(req);
     const taskState = "";
     console.log("url: " + url);
-    console.log("timeInMs: " + timeDelay);
-    
-    
+    console.log("schedluedDate: " + scheduledDate);
+    console.log("scheduledTime: "+scheduledTime);
+    //calculate time delay from provided scheduled date and time
+    var presentTimeInMsSinceEpoch = Date.now();
+    let time = scheduledDate+" "+scheduledTime;
+    var schedimeInMsSinceEpoch = Date.parse(time);
+    var timeDelay = schedimeInMsSinceEpoch- presentTimeInMsSinceEpoch;
+    console.log("delay in Ms "+ timeDelay);
+    //If we provide time which is already passed tasks are executed immediately
+    if(timeDelay<0)
+    {
+      timeDelay = 0;
+    }
     //create a task from TaskModel
     const taskInfo = new TaskModel({
       username: req.user.username,
       lambdaURL: url,
-      timeDelayInMs: timeDelay,
       parameters: JSON.stringify(params),
       taskState: "scheduled",
     });
@@ -239,8 +248,22 @@ router.post("/modify",function(req,res){
         if (result.username === req.user.username) {
           //if task is present in tasks map i.e task is in scheduled state
           if (tasks.has(taskId)) {
+            const modifiedDate = req.body.datefield;
+            const modifiedTime = req.body.timefield;
+            console.log("modifiedDate "+modifiedDate);
+            console.log("modifiedTime "+modifiedTime);
+            //calculate time delay from provided scheduled date and time
+            var presentTimeInMsSinceEpoch = Date.now();
+            let time = modifiedDate+" "+modifiedTime;
+            var modifiedTimeInMsSinceEpoch = Date.parse(time);
+            var timeDelay = modifiedTimeInMsSinceEpoch - presentTimeInMsSinceEpoch;
+            console.log("delay in Ms "+ timeDelay);
+            //If we provide time which is already passed tasks are executed immediately
+            if(timeDelay<0)
+            {
+              timeDelay = 0;
+            }
             //retrieve task details from taskDetails map 
-            let timeDelay = req.body.timeInMs;
             let url = taskDetails.get(taskId).url;
             let params = taskDetails.get(taskId).params;
             console.log(url);

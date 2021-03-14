@@ -39,20 +39,14 @@
 
         <!-- Time Delay -->
         <div class="form-group">
-            <label for="delayTime">TimeInMs</label>
-            <input
-              class="form-control"
-              name="timeInMs"
-              placeholder="Time in Millisecond"
-              type="number"
-              required
-            />
-            <div class="invalid-feedback">
-              Invalid Time Delay
-            </div>
-            <small id="emailHelp" class="form-text text-muted">Provide Scheduling Time from the Present Moment.</small>
+          <label for="delayTime">Modified Time</label>
+          <div >
+            <input id="datefield" name='datefield' type='date' min='2021-01-01' max='2030-12-13' required></input>
+            <input type="time" id="timefield" name="timefield"  required>
           </div>
-          <!-- end of time delay -->
+          <small id="timeHelp" class="form-text text-muted">Task can be Modified to Atmost 24 days later starting from present.</small>
+        </div>
+        <!-- end of time delay -->
 
         <button type="submit" class="btn btn-primary button">
           Modify Task
@@ -62,6 +56,6 @@
     <script>
       $("#cancelTaskForm").validate();
     </script>
-    
+    <script src="js/timeUtils.js"></script>
   </body>
 </html>
