@@ -22,7 +22,6 @@ module.exports.connection = function () {
     {lambdaURL, timeDelayInMs, taskState} 
 */
 module.exports.createSchedulerCollection = function () {
-  //connection();
   const schedulerCollection = mongoose.Schema({
     username: String,
     lambdaURL: String,
@@ -40,6 +39,17 @@ module.exports.createUsersCollection = function () {
   //enable passportLocalMongoose for auth collection
   userAuthCollection.plugin(passportLocalMongoose);
   return mongoose.model("user", userAuthCollection);
+};
+
+module.exports.createOrchestratorCollection = function(){
+  const orchestratorCollection = mongoose.Schema({
+    firstTaskURL: String,
+    secondTaskURL: String,
+    conditionCheckURL:String,
+    fallbackTaskURL:String,
+    conditionCheckRetries:Number
+  });
+  return mongoose.model("orchestratorTask", orchestratorCollection);
 };
 
 module.exports.updateTaskState = function (TaskModel, id, taskState) {

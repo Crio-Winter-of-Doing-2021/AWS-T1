@@ -3,6 +3,7 @@ const session = require("express-session");
 const flash = require("connect-flash");
 const userRouter = require("./routes/user.js");
 const schedulerRouter = require("./routes/scheduler.js");
+const orchestratorRouter = require('./routes/orchestrator.js');
 const DB = require(__dirname + "/db.js");
 
 const app = express();
@@ -32,6 +33,7 @@ app.use((req, res, next) => {
 
 app.use(userRouter);
 app.use(schedulerRouter);
+app.use(orchestratorRouter);
 
 //connect to database
 DB.connection();

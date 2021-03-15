@@ -1,0 +1,70 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="/images/logo.jpg" type="image/x-icon" />
+
+    <!-- include libraries.ejs -->
+    <%- include('../partials/libraries.ejs') %>
+
+    <!-- custom css -->
+    <link rel="stylesheet" href="/css/styles.css" />
+
+    <title>Orchestration</title>
+  </head>
+  <body>
+        <div class="wrapper">
+            <h1 class="display-3 heading">Orchestrate Task</h1>
+            <form method="POST" id="orchestrateTaskForm">
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="firstTaskURL">First Task URL</label>
+                        <input type="url" class="form-control" name="firstTaskURL" placeholder="enter first task URL" required>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="initialDelay">Initial Delay</label>
+                        <input type="number" class="form-control" name="initialDelay" placeholder="Enter Initial Delay in Ms" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="secondTaskURL">Second Task URL</label>
+                        <input type="url" class="form-control" name="secondTaskURL" placeholder="enter second task url" required>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="fallbackTaskURL">Fallback Task URL</label>
+                        <input type="url" class="form-control" name="fallbackTaskURL" placeholder="Enter fallback Task URL" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="conditionCheckURL">Condition Check URL</label>
+                        <input type="url" class="form-control" name="conditionCheckURL" placeholder="enter condition check url" required>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="timeDelayForConditionCheck">Time Delay For Condition Check</label>
+                        <input type="number" class="form-control" name="timeDelayForConditionCheck" placeholder="enter time delay for condition check" required>
+                    </div>
+                </div>
+            
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="conditionCheckRetries">Condition Check Retries</label>
+                        <input type="number" class="form-control" name="conditionCheckRetries" placeholder="enter condition check retries" required>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="timeDelayForRetries">Time Delay For Retries</label>
+                        <input type="number" class="form-control" name="timeDelayForRetries" placeholder="Enter time delay for retries" required>
+                    </div>
+                </div>
+                <!-- submit button -->
+                <button type="submit" class="btn btn-primary button">Schedule Orchestration</button>
+                <!-- end submit button -->
+            </form>
+        </div>
+        <script>
+            $("#orchestrateTaskForm").validate();
+        </script>
+  </body>
+</html>
