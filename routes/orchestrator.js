@@ -42,6 +42,7 @@ router.post("/orchestrate",function(req,res){
         secondTaskURL: secondTaskURL,
         conditionCheckURL: conditionCheckURL,
         fallbackTaskURL: fallbackTaskURL,
+        taskState:'scheduled',
         conditionCheckRetries: conditionCheckRetries
     });
     //save the task in database
@@ -54,34 +55,43 @@ router.post("/orchestrate",function(req,res){
             let id = result._id.toString();
             var task = setTimeout(function () {
                 console.log("in set timeout for first task");
+                DB.updateTaskState(TaskModel,id,'first-task running');
                 axios.get(firstTaskURL)
                 .then((response)=>
                 {
                     console.log('first task executed successfully');
+                    DB.updateTaskState(TaskModel,id,'first-task completed');
                     var checkCondition = setTimeout(function(){
+                        DB.updateTaskState(TaskModel,id,'condition-check-task running');
                         axios.get(conditionCheckURL)
                         .then((response)=>
                         {
-                            console.log('condition check executed successfully');
+                            DB.updateTaskState(TaskModel,id,'condition-check-task completed');
+                            console.log('condition-check-task executed successfully');
                             console.log(response.data);
                             if(response.data.conditionSatisfied == 1)
                             {
+                                DB.updateTaskState(TaskModel,id,'second-task running');
                                 axios.get(secondTaskURL)
                                 .then((response)=>
                                 {
+                                    DB.updateTaskState(TaskModel,id,'second-task completed');
                                     console.log('second task executed');
                                     tasks.delete(id);
                                 },
                                 (error)=>{
+                                    DB.updateTaskState(TaskModel,id,'second-task failed');
                                     utils.retries(id,conditionCheckRetries,timeDelayForRetries,conditionCheckURL,secondTaskURL,fallbackTaskURL);
                                     console.log('error in executing second task');
                                 });
                             }
                             else{
+                                DB.updateTaskState(TaskModel,id,'condition-check-task condition-failure');
                                 utils.retries(id,conditionCheckRetries,timeDelayForRetries,conditionCheckURL,secondTaskURL,fallbackTaskURL);
                             }
                         },
                         (error)=>{
+                            DB.updateTaskState(TaskModel,id,'condition-check-task failed');
                             console.log('error in executing condition check');
                             utils.retries(id,conditionCheckRetries,timeDelayForRetries,conditionCheckURL,secondTaskURL,fallbackTaskURL);
                         });
@@ -89,6 +99,7 @@ router.post("/orchestrate",function(req,res){
                 },
                 (error) =>{
                     console.log(error);
+                    DB.updateTaskState(TaskModel,id,'first-task failed');
                     console.log("failed execution of first task");
                 });
             },initialDelay);
