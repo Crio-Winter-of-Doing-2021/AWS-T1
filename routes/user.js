@@ -1,12 +1,14 @@
 const express = require("express");
-
+const nodemailer = require("nodemailer");
 const session = require("express-session");
 const passport = require("passport");
 const passportLocalMongoose = require("passport-local-mongoose");
 const DB = require("../db.js");
 const router = express.Router();
 
+
 const userModel = DB.createUsersCollection();
+
 
 //authentication middleware
 router.use(passport.initialize());
@@ -107,6 +109,81 @@ router.post("/reset",function(req,res){
     }
   })
   
+});
+
+router.post("/forgot",function(req,res){
+  //var username = req.body.username;
+  // var transporter = nodemailer.createTransport({
+  //   service: 'gmail',
+  //   auth: {
+  //     user: 'pkc3766@gmail.com',
+  //     pass: 'pkclegend@'
+  //   }
+  // });
+ 
+  
+  userModel.findByUsername(req.body.username,function(err,user){
+    if(err)
+    {
+      req.session.message = {
+        type: 'danger',
+        intro: '',
+        message: 'Email address is not registered!',
+      };
+      res.redirect("/forgot");
+    }
+    else{
+      //var user = result[0];
+      //console.log(user);
+      var password = Math.random().toString(36).slice(-8);
+      console.log(password);
+      user.setPassword(password, function (err,user) { 
+        if (err){ 
+          console.log('err '+err);
+          //console.log('user '+user);
+          //console.log(err);
+          req.session.message = {
+            type: 'danger',
+            intro: 'Error',
+            message: 'error in setting password. Please try again',
+          };
+          res.redirect("/forgot");
+        } 
+        else
+        { 
+          user.save();
+          //
+          // var text ='your new password is '+ password +' you are advised to reset it once you login with this password';
+          // var mailOptions = {
+          //   from: 'pkc3766@gmail.com',
+          //   to: req.user.username,
+          //   subject: 'Password change',
+          //   text: text
+          // };
+          // console.log('jkkk1');
+          // transporter.sendMail(mailOptions, function(error, info){
+          //   if (error) {
+          //     req.session.message = {
+          //       type: 'danger',
+          //       intro: 'Error',
+          //       message: 'error in sending password. please try again',
+          //     };
+          //     //res.redirect("/forgot");
+          //   } else {
+          //     req.session.message = {
+          //       type: 'success',
+          //       intro: '',
+          //       message: 'your new password is sent to your registered username/email',
+          //     };
+          //     //res.redirect("/forgot");
+          //   }
+          // });
+          res.redirect("/forgot");
+        } 
+        
+    }); 
+    }
+  })
 });
 
 module.exports = router;

@@ -26,7 +26,7 @@ module.exports.createSchedulerCollection = function () {
     username: String,
     lambdaURL: String,
     parameters:String,
-    taskState: String,
+    taskState: String
   });
   return mongoose.model("task", schedulerCollection);
 };
@@ -34,7 +34,7 @@ module.exports.createSchedulerCollection = function () {
 module.exports.createUsersCollection = function () {
   const userAuthCollection = mongoose.Schema({
     username: String,
-    password: String,
+    password: String
   });
   //enable passportLocalMongoose for auth collection
   userAuthCollection.plugin(passportLocalMongoose);

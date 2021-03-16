@@ -5,11 +5,20 @@
 	<meta name="author" content="Kodinger">
 	<meta name="viewport" content="width=device-width,initial-scale=1">
 	<title>Forgot Password</title>
-	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-	<link rel="stylesheet" type="text/css" href="css/auth.css">
+	<link rel="stylesheet" href="/css/auth.css">
+	<!-- include libraries.ejs -->
+    <%- include('../partials/libraries.ejs') %>
+
 	<link rel="icon" href="/images/logo.jpg" type="image/x-icon" />
 </head>
+<% if(message){ %>
+	<div style="text-align: center" class="alert alert-<%=message.type%>">
+		<button type="button" class="close" data-dismiss="alert">&times;</button>
+		<strong><%=message.intro%></strong> <%=message.message%>
+	</div>
+<% } %>
 <body class="my-login-page">
+	
 	<section class="h-100">
 		<div class="container h-100">
 			<div class="row justify-content-md-center align-items-center h-100">
@@ -17,25 +26,26 @@
 					<!-- <div class="brand">
 						<img src="images/logo.jpg" alt="bootstrap 4 login page">
 					</div> -->
-					<div class="card fat" >
+					<div class="card fat" style="margin-top: -50%" >
 						<div class="card-body">
 							<h4 class="card-title">Forgot Password</h4>
 							<form method="POST" class="validation" novalidate="">
 								<div class="form-group">
-									<label for="email">E-Mail Address</label>
-									<input id="email" type="email" class="form-control" name="email" value="" required autofocus>
-									<div class="invalid-feedback">
-										Email is invalid
-									</div>
-									<div class="form-text text-muted">
-										By clicking "Reset Password" we will send a password reset link
-									</div>
+									<label for="email">username</label>
+									<input id="email" type="email" class="form-control" name="username" placeholder="enter your registered email address" required autofocus>
+									
+									
 								</div>
-
+								<div class="form-text text-muted">
+									By clicking "Reset Password" we will send a new password to your registered email address.
+								</div>
 								<div class="form-group m-0">
 									<button type="submit" class="btn btn-primary btn-block">
 										Reset Password
 									</button>
+								</div>
+								<div class="mt-4 text-center">
+									Login Here <a href="/login">login</a>
 								</div>
 							</form>
 						</div>
