@@ -53,8 +53,8 @@ router.post("/orchestrate",function(req,res){
         else 
         {
             let id = result._id.toString();
+            console.log("orchestration successfully scheduled");
             var task = setTimeout(function () {
-                console.log("in set timeout for first task");
                 DB.updateTaskState(TaskModel,id,'first-task running');
                 axios.get(firstTaskURL)
                 .then((response)=>
@@ -106,7 +106,8 @@ router.post("/orchestrate",function(req,res){
             tasks.set(id,task);
         }
     });
-    res.send('posted orchestrator');
+    utils.setFlashMessage(req,'success','success','orchestration successfully scheduled!');
+    res.redirect("/orchestrate");
 });
 
 

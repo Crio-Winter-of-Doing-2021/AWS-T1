@@ -14,6 +14,13 @@
     <title>Orchestration</title>
   </head>
   <body>
+        <%- include('../partials/navbar.ejs'); %>
+        <% if(message){ %>
+        <div style="text-align: center" class="alert alert-<%=message.type%>">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            <strong><%=message.intro%></strong> <%=message.message%>
+        </div>
+        <% } %>
         <div class="wrapper">
             <h1 class="display-3 heading">Orchestrate Task</h1>
             <form method="POST" id="orchestrateTaskForm">

@@ -64,4 +64,15 @@ module.exports.retries = function(id,conditionCheckRetries,timeDelayForRetries,c
     },timeDelayForRetries);  
 }
 
+/*
+    sets flash message
+  */
+module.exports.setFlashMessage = function (req, type, intro, message) {
+    req.session.message = {
+        type: type,
+        intro: intro,
+        message: message,
+    };
+};
+
 
