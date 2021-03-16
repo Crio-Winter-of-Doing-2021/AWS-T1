@@ -47,6 +47,7 @@ module.exports.createOrchestratorCollection = function(){
     secondTaskURL: String,
     conditionCheckURL:String,
     fallbackTaskURL:String,
+    taskState:String,
     conditionCheckRetries:Number
   });
   return mongoose.model("orchestratorTask", orchestratorCollection);

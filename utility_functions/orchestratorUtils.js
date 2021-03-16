@@ -1,130 +1,52 @@
-// const DB = require("../db.js");
-// const utils = require("../utility_functions/orchestratorUtils.js");
-// const orchestrator = require("../routes/orchestrator");
-// const axios = require("axios");
+const DB = require("../db.js");
+const orchestrator = require("../routes/orchestrator");
+const axios = require("axios");
 
-
-// module.exports.executeFirstTask = function(id, url){
-//     const TaskModel = orchestrator.TaskModel;
-//     let tasks = orchestrator.tasks;
-//     //update in database taskState to running
-//     DB.updateTaskState(TaskModel, id, "running first task");
-//     axios.get(url, {
-//       params:{}
-//     }).then(
-//       (response) => {
-//         //edge case: immediately executing tasks i.e timeDelay 0ms
-//         if (tasks.has(id)) {
-//           //update in database taskState to completed
-//          DB.updateTaskState(TaskModel, id, "First task execution completed");
-//         //   console.log("Task " + id + "  deleted succefully from map tasks");
-//         //   tasks.delete(id);
-//           console.log("successfully executed lambda");
-//           console.log("Response after execution");
-//           console.log(response);
-//           return true;
-//         } else {
-//           //console.log("Task with taskId " + id + " could not be executed");
-//           return false;
-//         }
-//       },
-//       (error) => {
-//         if (tasks.has(id)) {
-//           tasks.delete(id);
-//           console.log("Task " + id + "  deleted succefully from map tasks");
-//           //update in database taskState to failed
-//           DB.updateTaskState(TaskModel, id, "could not execute first task");
-//           console.log("error occured while executing task");
-//           console.log(error);
-//         } else {
-//           console.log("Task with taskId " + id + " could not be executed");
-//         }
-//         return false;
-//       }
-//     );
-// };
-
-// module.exports.executeSecondTask = function(){
-//     const TaskModel = orchestrator.TaskModel;
-//     let tasks = orchestrator.tasks;
-//     //update in database taskState to running
-//     DB.updateTaskState(TaskModel, id, "running second task");
-//     axios.get(url, {
-//       params:{}
-//     }).then(
-//       (response) => {
-//         //edge case: immediately executing tasks i.e timeDelay 0ms
-//         if (tasks.has(id)) {
-//           //update in database taskState to completed
-//          DB.updateTaskState(TaskModel, id, "second task execution completed");
-//         //   console.log("Task " + id + "  deleted succefully from map tasks");
-//         //   tasks.delete(id);
-//           console.log("successfully executed lambda");
-//           console.log("Response after execution");
-//           console.log(response);
-//           return true;
-//         } else {
-//           //console.log("Task with taskId " + id + " could not be executed");
-//           return false;
-//         }
-//       },
-//       (error) => {
-//         if (tasks.has(id)) {
-//           tasks.delete(id);
-//           console.log("Task " + id + "  deleted succefully from map tasks");
-//           //update in database taskState to failed
-//           DB.updateTaskState(TaskModel, id, "failed second task");
-//           console.log("error occured while executing task");
-//           console.log(error);
-//         } else {
-//           console.log("Task with taskId " + id + " could not be executed");
-//         }
-//         return false;
-//       }
-//     );
-// };
-
-// module.exports.executeFallbackTask = function(){
-//     const TaskModel = orchestrator.TaskModel;
-//     let tasks = orchestrator.tasks;
-//     //update in database taskState to running
-//     DB.updateTaskState(TaskModel, id, "running fallback task");
-//     axios.get(url, {
-//       params:{}
-//     }).then(
-//       (response) => {
-//         //edge case: immediately executing tasks i.e timeDelay 0ms
-//         if (tasks.has(id)) {
-//           //update in database taskState to completed
-//          DB.updateTaskState(TaskModel, id, "fallback task execution completed");
-//         //   console.log("Task " + id + "  deleted succefully from map tasks");
-//         //   tasks.delete(id);
-//           console.log("successfully executed lambda");
-//           console.log("Response after execution");
-//           console.log(response);
-//           return true;
-//         } else {
-//           //console.log("Task with taskId " + id + " could not be executed");
-//           return false;
-//         }
-//       },
-//       (error) => {
-//         if (tasks.has(id)) {
-//           tasks.delete(id);
-//           console.log("Task " + id + "  deleted succefully from map tasks");
-//           //update in database taskState to failed
-//           DB.updateTaskState(TaskModel, id, "could not execute fallback task");
-//           console.log("error occured while executing task");
-//           console.log(error);
-//         } else {
-//           console.log("Task with taskId " + id + " could not be executed");
-//         }
-//         return false;
-//       }
-//     );
-// };
-
-// module.exports.executeConditionCheck = function(){
-    
-// };
-
+function retries(id,conditionCheckRetries,timeDelayForRetries,conditionCheckURL,secondTaskURL,fallbackTaskURL){
+    const TaskModel = orchestrator.TaskModel;
+    let tasks = orchestrator.tasks;
+    var conditionCheck = setInterval(function(){
+        if(conditionCheckRetries>0)
+        {
+            console.log(conditionCheckRetries);
+            conditionCheckRetries-=1;
+            axios.get(conditionCheckURL)
+            .then((response)=>
+            {
+                console.log('condition check executed');
+                console.log(response);
+                if(response.data.conditionSatisfied == 1)
+                {
+                    console.log('got here');
+                    axios.get(secondTaskURL)
+                    .then((response)=>
+                    {
+                        console.log('second task executed');
+                        tasks.delete(id);
+                        clearInterval(conditionCheck);
+                    },
+                    (error)=>{
+                        console.log('error in executing second task');
+                    });
+                }
+            },
+            (error)=>{
+                console.log('error in executing condition check');
+            });
+        }
+        else
+        {
+            clearInterval(conditionCheck);
+            tasks.delete(id);
+            axios.get(fallbackTaskURL)
+            .then((response)=>
+            {
+                console.log('fallback task executed');
+                //console.log(response);
+            },
+            (error)=>{
+                console.log('error in executing fallback task');
+            });
+        }
+    },timeDelayForRetries);  
+}
