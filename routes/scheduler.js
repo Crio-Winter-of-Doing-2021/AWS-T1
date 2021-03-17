@@ -74,6 +74,7 @@ router.get("/retrieve-all-tasks", function (req, res) {
 
 router.post("/schedule", function (req, res) {
   if (req.isAuthenticated()) {
+    const taskName = req.body.taskName;
     const url = req.body.URL;
     const scheduledDate = req.body.datefield;
     const scheduledTime = req.body.timefield;
@@ -89,7 +90,7 @@ router.post("/schedule", function (req, res) {
     var schedimeInMsSinceEpoch = Date.parse(time);
     var timeDelay = schedimeInMsSinceEpoch- presentTimeInMsSinceEpoch;
     console.log("delay in Ms "+ timeDelay);
-    //If we provide time which is already passed tasks are executed immediately
+    //If we provide time which is already<div></div> passed tasks are executed immediately
     if(timeDelay<0)
     {
       timeDelay = 0;
@@ -97,7 +98,9 @@ router.post("/schedule", function (req, res) {
     //create a task from TaskModel
     const taskInfo = new TaskModel({
       username: req.user.username,
+      taskName: taskName,
       lambdaURL: url,
+      schedulingTime:time,
       parameters: JSON.stringify(params),
       taskState: "scheduled",
     });

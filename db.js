@@ -24,7 +24,9 @@ module.exports.connection = function () {
 module.exports.createSchedulerCollection = function () {
   const schedulerCollection = mongoose.Schema({
     username: String,
+    taskName:String,
     lambdaURL: String,
+    schedulingTime:String,
     parameters:String,
     taskState: String
   });

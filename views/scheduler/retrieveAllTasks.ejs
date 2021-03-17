@@ -17,13 +17,16 @@
 
 <body>
     <%- include('../partials/navbar.ejs'); %>
-    <h2 style="text-align: center; padding-top: 30px; color:brown;">List of all the Tasks</h2>
-    <div class="tableContainer" style="height: fit-content; margin-top:40px">
-        <table class="styled-table">
-            <thead>
-                <tr>
+    
+    <!-- <h2 style="text-align: center; padding-top: 30px; color:brown;">All the Tasks Scheduled by you</h2> -->
+    <div class="tableContainer" style="height: fit-content; margin-top:40px; margin-bottom: 30px;">
+        <table class="table table-bordered  styled-table">
+            <thead >
+                <tr >
                     <th>Task Id</th>
+                    <th>Task Name</th>
                     <th>URL</th>
+                    <th>Scheduling Time</th>
                     <th>Task State</th>
                     <th>Query String Paramters</th>
                 </tr>
@@ -32,10 +35,17 @@
                 <%for(var i=0;i<results.length;i++){%>
                     <tr>
                         <td>
-                            <%=results[i]._id%>
+                            <strong><%=results[i]._id%></strong>
+                            
+                        </td>
+                        <td>
+                            <%=results[i].taskName%>
                         </td>
                         <td>
                             <%=results[i].lambdaURL%>
+                        </td>
+                        <td>
+                            <%=results[i].schedulingTime%>
                         </td>
                         <td>
                             <%=results[i].taskState%>

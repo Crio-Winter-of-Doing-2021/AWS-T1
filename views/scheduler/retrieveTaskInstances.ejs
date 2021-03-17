@@ -42,11 +42,13 @@
       <!-- retrieve tasks with provided task States -->
       <h2 style="text-align: center; padding-top: 30px; color:brown;"><%=taskInstance%> Tasks</h2>
         <div class="tableContainer">
-        <table class="styled-table" style="margin:0 auto;">
+        <table class="table table-bordered styled-table" style="margin:0 auto;">
           <thead>
-            <tr>
+            <tr >
               <th>Task Id</th>
+              <th>Task Name</th>
               <th>URL</th>
+              <th>Scheduling Time</th>
               <th>Query String Parameters</th>
             </tr>
           </thead>
@@ -54,10 +56,16 @@
             <%for(var i=0;i<results.length;i++){%>
               <tr>
                 <td>
-                  <%=results[i]._id%>
+                  <strong><%=results[i]._id%></strong>
+                </td>
+                <td>
+                  <%=results[i].taskName%>
                 </td>
                 <td>
                   <%=results[i].lambdaURL%>
+                </td>
+                <td>
+                  <%=results[i].schedulingTime%>
                 </td>
                 <td>
                   <%=results[i].parameters%>

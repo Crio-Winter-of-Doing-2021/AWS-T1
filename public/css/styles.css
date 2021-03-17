@@ -61,10 +61,13 @@ label{
 
 }
 .styled-table thead tr {
+    
     background-color: #009879;
     color: #ffffff;
     text-align: left;
+    
 }
+
 
 .styled-table th,
 .styled-table td {
@@ -83,6 +86,12 @@ label{
     border-bottom: 2px solid #009879;
 }
 
+.styled-table th{
+    position: sticky;
+    /* top: 55px; */
+    background-color: #009879;
+    color: #ffffff;
+}
 /* end of table styles */
 
 
