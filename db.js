@@ -26,7 +26,7 @@ module.exports.createSchedulerCollection = function () {
     username: String,
     taskName:String,
     lambdaURL: String,
-    schedulingTime:String,
+    scheduledTime:String,
     parameters:String,
     taskState: String
   });

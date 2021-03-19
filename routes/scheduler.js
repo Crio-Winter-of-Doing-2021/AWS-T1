@@ -100,7 +100,7 @@ router.post("/schedule", function (req, res) {
       username: req.user.username,
       taskName: taskName,
       lambdaURL: url,
-      schedulingTime:time,
+      scheduledTime:time,
       parameters: JSON.stringify(params),
       taskState: "scheduled",
     });

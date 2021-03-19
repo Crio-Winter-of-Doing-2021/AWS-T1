@@ -1,0 +1,22 @@
+#taskDetails div{
+    
+    margin-left: 130px;
+    
+}
+
+.taskState{
+    display: inline-block;
+}
+.wrapper{
+    margin-top:20px;
+    padding-top: 10px;
+    padding-bottom: 20px;
+    height: fit-content;
+    width: fit-content;
+    background-color: #e4fbff;
+    border-radius: 30px;
+}
+.taskState button{
+    position: absolute;
+    top: 80px;
+}

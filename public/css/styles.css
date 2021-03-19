@@ -99,9 +99,37 @@ label{
     height:350px;
     overflow-y:auto;
     overflow-x: auto;
-    margin-left:5%;
-    margin-right: 5%;
+    /* margin-left:5%;
+    margin-right: 5%; */
 }
+
+
+/* display task details css */
+
+#taskDetails{
+    padding:5px 10px 5px 10px;
+    
+}
+
+
+.taskState{
+    display: inline-block;
+}
+.taskDetailsWrapper{
+    
+    margin-top:20px;
+    margin-bottom:20px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    overflow-x: auto;
+    border-radius: 20px;
+    /* margin-left:0; */
+}
+button{
+    margin-top:5px;
+}
+
+/* end of display task details css */
 
 /* ---------------------------------------------------
     MEDIAQUERIES
@@ -119,10 +147,9 @@ label{
 
     .tableContainer{
         height:300px;
+        width: 100%;
         overflow-y:auto;
         overflow-x: auto;
-        margin-left:5%;
-        margin-right: 5%;
-        /* margin: 0 auto; */
+        
     }
 }

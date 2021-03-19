@@ -17,71 +17,94 @@
 
 <body>
   <%- include('../partials/navbar.ejs'); %>
-    <div class="wrapper">
-      <h1 class="display-3 heading">Retrieve Tasks</h1>
-      <form action="" method="POST" id="retrieveTasks">
+  <div class="wrapper">
+    <h1 class="display-3 heading">Retrieve Tasks</h1>
+    <form action="" method="POST" id="retrieveTasks">
 
-        <div class="form-group">
-          <label for="taskInstance">Select Task Instance</label>
-          <input type="text" class="form-control" name="taskState" list="states" placeholder="e.g. completed" required>
-          <datalist id="states">
-            <option value="completed">
-            <option value="running">
-            <option value="scheduled">
-            <option value="cancelled">
-            <option value="failed">
-          </datalist>
-        </div>
-        <button type="submit" class="btn btn-primary button">
-          Retrieve Tasks
-        </button>
-      </form>
-    </div>
-
-    <%if(taskInstance!=""){%>
-      <!-- retrieve tasks with provided task States -->
-      <h2 style="text-align: center; padding-top: 30px; color:brown;"><%=taskInstance%> Tasks</h2>
-        <div class="tableContainer">
-        <table class="table table-bordered styled-table" style="margin:0 auto;">
-          <thead>
-            <tr >
-              <th>Task Id</th>
-              <th>Task Name</th>
-              <th>URL</th>
-              <th>Scheduling Time</th>
-              <th>Query String Parameters</th>
-            </tr>
-          </thead>
-          <tbody>
-            <%for(var i=0;i<results.length;i++){%>
-              <tr>
-                <td>
-                  <strong><%=results[i]._id%></strong>
-                </td>
-                <td>
-                  <%=results[i].taskName%>
-                </td>
-                <td>
-                  <%=results[i].lambdaURL%>
-                </td>
-                <td>
-                  <%=results[i].schedulingTime%>
-                </td>
-                <td>
-                  <%=results[i].parameters%>
-                </td>
-              </tr>
-              <%}%>
-                <!-- and so on... -->
-          </tbody>
-        </table>
+      <div class="form-group">
+        <label for="taskInstance">Select Task Instance</label>
+        <input type="text" class="form-control" name="taskState" list="states" placeholder="e.g. completed" required>
+        <datalist id="states">
+          <option value="completed">
+          <option value="running">
+          <option value="scheduled">
+          <option value="cancelled">
+          <option value="failed">
+        </datalist>
       </div>
-      <%}%>
-   
-        <script>
-          $("#retrieveTasks").validate();
-        </script>
+      <button type="submit" class="btn btn-primary button">
+        Retrieve Tasks
+      </button>
+    </form>
+  </div>
 
+  <%if(taskInstance!=""){%>
+    <!-- map to store buttonType and divColor of for styling various task states -->
+      <%let mp=new Map();%>
+      <%mp.set('scheduled',{buttonType:'primary',divColor:'#e4fbff'});%>
+      <%mp.set('completed',{buttonType:'success',divColor:'#9ecca4'});%>
+      <%mp.set('running',{buttonType:'warning',divColor:'#fff9b0'});%>
+      <%mp.set('failed',{buttonType:'danger',divColor:'#f5c0c0'});%>
+      <%mp.set('cancelled',{buttonType:'dark',divColor:'#c8c6a7'});%>
+      <%let divColor=mp.get(taskInstance).divColor;%>
+      <%if(results.length==0){%>
+      <h1 style="text-align: center; margin: 40px;">There are no tasks in <%=taskInstance%> state.</h1>
+  <%}else{%>
+      <h1 style="text-align: center;color: brown;">
+        <%=taskInstance%> Tasks
+      </h1>
+      <%}%>
+        <div class="tableContainer">
+          <%for(var i=0;i<results.length;i++){%>
+            <div class="container taskDetailsWrapper" style="background-color: <%=divColor%>;">
+              <div style="color: blue;text-align: right;">
+                <strong>
+                  <%=results[i].scheduledTime%>
+                </strong>
+              </div>
+              <div style="border: 2px solid black;" id="taskDetails">
+                
+                <!-- task details -->
+                <strong>TaskName:</strong> <span style="padding-left: 20px;">
+                  <%=results[i].taskName%>
+                </span><br>
+                <strong>TaskId:</strong> <span style="padding-left: 48px;">
+                  <%=results[i]._id%>
+                </span><br>
+                <strong>LambdaURL:</strong> <span style="padding-left: 6px;">
+                  <%=results[i].lambdaURL%>
+                </span><br>
+                <!-- end task details -->
+
+                <%var params=results[i].parameters;%>
+                <!-- parameters drop down -->
+                  <%if(params.length>2){%>
+                    <%params=params.substring(1,params.length-1);%>
+                    <%params=params.split(",");%>
+                    <div class="dropdown show">
+                      <a class="btn btn-outline-primary btn-sm  dropdown-toggle" href="#"
+                        role="button" id="dropdownMenuLink" data-toggle="dropdown"
+                        aria-haspopup="true" aria-expanded="false">
+                        Parameters
+                      </a>
+                      <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                        <%for(var j=0;j<params.length;j++){%>
+                          <a class="dropdown-item" href="#">
+                            <%=params[j]%>
+                          </a>
+                          <%}%>
+                      </div>
+                    </div>
+                  <%}%>
+                  <!-- end of parameters drop down -->
+              </div>
+            </div>
+            <%}%>
+    <%}%>
+</div>
+<script>
+  $("#retrieveTasks").validate();
+</script>
 </body>
 
 </html>
