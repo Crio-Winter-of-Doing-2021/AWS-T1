@@ -1,9 +1,6 @@
 'use strict';
 
-
 $(function() {
-
-
 
 	$(".validation").submit(function() {
 		var form = $(this);
