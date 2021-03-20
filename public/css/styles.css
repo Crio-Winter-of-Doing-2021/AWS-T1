@@ -91,20 +91,31 @@ label{
 }
 
 
-/* display task details css */
+/* Task details css */
 
 .taskDetailsWrapper{
-    margin:20px;
-    padding:15px;
+    margin-left: 10%;
+    margin-right: 10%;
+    margin-bottom: 20px;
+    padding: 20px;
     border-radius: 5px;
     /* margin-left:0; */
+}
+
+.taskDetail{
+    overflow: auto;
+}
+
+.parameters{
+    overflow: auto;
+    height: 80px;
 }
 
 .taskDetailsWrapper .dropdown-submenu {
     position: relative;
   }
   
-  .taskDetailsWrapper .dropdown-submenu > .dropdown-menu {
+.taskDetailsWrapper .dropdown-submenu > .dropdown-menu {
     top: 0;
     left: 100%;
     margin-top: -6px;
@@ -112,17 +123,17 @@ label{
     -webkit-border-radius: 0 6px 6px 6px;
     -moz-border-radius: 0 6px 6px;
     border-radius: 0 6px 6px 6px;
-  }
+}
   
-  .taskDetailsWrapper .parametersMenuAlign{
+.taskDetailsWrapper .parametersMenuAlign{
     text-align: center;
-  }
+}
   
-  .taskDetailsWrapper .dropdown-submenu:hover > .dropdown-menu {
+.taskDetailsWrapper .dropdown-submenu:hover > .dropdown-menu {
     display: block;
-  }
+}
   
-  .taskDetailsWrapper .dropdown-submenu > a:after {
+.taskDetailsWrapper .dropdown-submenu > a:after {
     display: block;
     content: " ";
     float: right;
@@ -134,23 +145,24 @@ label{
     border-left-color: #ccc;
     margin-top: 5px;
     margin-right: -10px;
-  }
+}
   
-  .taskDetailsWrapper .dropdown-submenu:hover>a:after {
+.taskDetailsWrapper .dropdown-submenu:hover>a:after {
     border-left-color: #fff;
-  }
+   
+}
   
-  .taskDetailsWrapper .dropdown-submenu.pull-left {
+.taskDetailsWrapper .dropdown-submenu.pull-left {
     float: none;
-  }
-  
-  .taskDetailsWrapper .dropdown-submenu.pull-left>.dropdown-menu {
+}
+
+.taskDetailsWrapper .dropdown-submenu.pull-left>.dropdown-menu {
     left: -100%;
     margin-left: 10px;
     -webkit-border-radius: 6px 0 6px 6px;
     -moz-border-radius: 6px 0 6px 6px;
     border-radius: 6px 0 6px 6px;
-  }
+}
   
 
 /* end of display task details css */
@@ -158,12 +170,29 @@ label{
 /* ---------------------------------------------------
     MEDIAQUERIES
 ----------------------------------------------------- */
+/* @media only screen and (min-width:320px) and (max-width:480px) 
+{
+    .taskDetailsWrapper .parametersMenuAlign{
+        text-align: left;
+    }
 
-@media (max-width: 600px) {
+    .taskDetail{
+        overflow: auto;
+        width:5px;
+    }
+
+    .parameters{
+        overflow: auto;
+        width: 5px;
+        height: 50px;
+    }
+} */
+
+@media (max-width:600px) {
     
     .heading{
         text-align: left;
-        font-size: 1.8rem;
+        font-size: 1.6rem;
         font-weight: bold;
         margin-top:50px;
         margin-bottom: 30px;
@@ -188,5 +217,17 @@ label{
     .taskDetailsWrapper .parametersMenuAlign{
         text-align: left;
     }
+
+    .taskDetail{
+        overflow: auto;
+        width:30px;
+    }
+
+    .parameters{
+        overflow: auto;
+        width: 30px;
+        height: 50px;
+    }
     
 }
+

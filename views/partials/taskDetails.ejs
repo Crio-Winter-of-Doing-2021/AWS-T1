@@ -3,17 +3,17 @@
 <%mp.set('scheduled',{buttonType:'primary',divColor:'#e4fbff'});%>
 <%mp.set('completed',{buttonType:'success',divColor:'#9ecca4'});%>
 <%mp.set('running',{buttonType:'warning',divColor:'#fff9b0'});%>
-<%mp.set('failed',{buttonType:'danger',divColor:'#f5c0c0'});%>
+<%mp.set('failed',{buttonType:'danger',divColor:'#ff7171'});%>
 <%mp.set('cancelled',{buttonType:'dark',divColor:'#c8c6a7'});%>
 
 <!-- Task Details -->
-<%for(var i=0;i<results.length;i++){%>
+<%for(var i=results.length-1;i>=0;i--){%>
     <%let buttonType=mp.get(results[i].taskState).buttonType;%>
     <%let divColor=mp.get(results[i].taskState).divColor;%>
     <div  class="taskDetailsWrapper" style="background-color: <%=divColor%>;">
       <!-- scheduling time and task-state -->
         <div class="d-flex">
-            <div class="pb-2 flex-fill"><strong><%=results[i].taskName%></strong></div>
+            <div class="pb-2 flex-fill"><h3 style="color: #930077"><%=results[i].taskName%></h3></div>
             <div class=" pb-2 flex-fill" style="text-align: end;" ><button class="btn btn-<%=buttonType%> "><%=results[i].taskState%></button></div>
         </div>
         <!-- <div style="width: 100px;"> -->
@@ -26,26 +26,26 @@
     
                 <li class="dropdown-submenu" >
                     <a  class="dropdown-item" tabindex="-1"> Task Name </a>
-                    <ul class="dropdown-menu">
+                    <ul class="dropdown-menu taskDetail">
                         <span id="taskNameSpan<%=i%>" class="dropdown-item"><a href="#" onclick="copy_to_clipboard('taskNameSpan<%=i%>');"><i class="fas fa-copy"></i></a> <%=results[i].taskName%> </span>
                     </ul>
                 </li>
                 <li class="dropdown-submenu">
                     <a  class="dropdown-item" tabindex="-1" ><i class="fa fa-fingerprint" aria-hidden="true"></i> Task Id</a>
-                    <ul class="dropdown-menu">
-                        <span  id="taskIdSpan<%=i%>" class="dropdown-item"><a href="#" onclick="copy_to_clipboard('taskIdSpan<%=i%>');"><i class="fas fa-copy"></i></a> <%=results[i]._id%> </span>
+                    <ul class="dropdown-menu taskDetail">
+                        <span  id="taskIdSpan<%=i%> " class="dropdown-item"><a href="#" onclick="copy_to_clipboard('taskIdSpan<%=i%>');"><i class="fas fa-copy"></i></a> <%=results[i]._id%> </span>
                     </ul>
                 </li>
                 <li class="dropdown-submenu">
-                    <a  class="dropdown-item" tabindex="-1"><i class="fa fa-passport" aria-hidden="true"></i> URL</a>
-                    <ul class="dropdown-menu">
+                    <a  class="dropdown-item" tabindex="-1"><i class="fa fa-passport" aria-hidden="true"></i> Lambda URL</a>
+                    <ul class="dropdown-menu taskDetail" >
                         <span  id="taskURLSpan<%=i%>" class="dropdown-item" ><a href="#" onclick="copy_to_clipboard('taskURLSpan<%=i%>');"><i class="fas fa-copy"></i></a> <%=results[i].lambdaURL%> </span>
                     </ul>
                 </li>
                 <li class="dropdown-submenu">
                     <a  class="dropdown-item" tabindex="-1" ><i class="fa fa-calendar-alt" aria-hidden="true"></i>
                     Scheduled Time</a>
-                    <ul class="dropdown-menu">
+                    <ul class="dropdown-menu taskDetail">
                         <span class="dropdown-item"><%=results[i].scheduledTime%> </span>
                     </ul>
                 </li>
@@ -56,12 +56,17 @@
                     <%params=params.split(",");%>
                     <li class="dropdown-submenu">
                         <a  class="dropdown-item" tabindex="-1"><i class="fab fa-product-hunt" aria-hidden="true"></i>
-                            Query String Parameters</a>
-                        <ul class="dropdown-menu">
-                            <%for(var j=0;j<params.length;j++){%>
-                                <span class="dropdown-item"><%=params[j]%></span>
-                            <%}%>
-                        </ul>
+                            Parameters</a>
+
+                            <ul class="dropdown-menu parameters">
+                                <!-- <div style="overflow: auto;"> -->
+                                <%for(var j=0;j<params.length;j++){%>
+                                    <a class="dropdown-item"><%=params[j]%></a>
+                                <%}%>
+                                <!-- </div> -->
+                            </ul>
+                        
+                        
                     </li>
                 <%}%>
                 <!-- end of parameters menu item -->  
