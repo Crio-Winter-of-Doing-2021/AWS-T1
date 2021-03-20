@@ -1,10 +1,9 @@
-<html lang="en">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="./css/temp.css">
-    <!-- Bootstrap CDN -->
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>CSS3 Dropdown Menu</title>
+<!-- Bootstrap CDN -->
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
 
 
@@ -21,20 +20,61 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 
-    <title>temp</title>
+<link href="css/temp.css" rel="stylesheet"/>
+
 </head>
+
 <body>
-    <div class="container wrapper">
-        <div> <strong style="color: blue;">2021/03/11 17:30</strong></div>
-        <div class=" container taskState">
-            <button class="btn btn-primary">Scheduled</button>
-        </div>
-        <div class="container" style="border: 2px solid black;" id="taskDetails">
-            <div><strong>TaskName</strong></div>
-            <div>TaskId</div>
-            <div>LambdaURL</div>
-            <div>Parameters</div>
-        </div>
-    </div>
+  
+    
+  <div class="dropdown">
+    <button class="btn btn-info dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      <i class="fa fa-tasks" aria-hidden="true"></i> Task Details
+    </button>
+    <ul class="dropdown-menu multi-level" role="menu" aria-labelledby="dropdownMenu">
+      <li class="dropdown-submenu">
+        <a  class="dropdown-item" tabindex="-1" href="#"> Task Name </a>
+        <ul class="dropdown-menu">
+          <span id="taskNameSpan" class="dropdown-item">Task Name <a href="#" onclick="copy_to_clipboard('taskNameSpan');"><i class="fas fa-copy"></i></a></span>
+        </ul>
+      </li>
+      <li class="dropdown-submenu">
+        <a  class="dropdown-item" tabindex="-1" href="#"><i class="fa fa-fingerprint" aria-hidden="true"></i> Task Id</a>
+        <ul class="dropdown-menu">
+          <span id="taskIdSpan" class="dropdown-item">Task Id <a href="#" onclick="copy_to_clipboard('taskIdSpan');"><i class="fas fa-copy"></i></a></span>
+        </ul>
+      </li>
+      <li class="dropdown-submenu">
+        <a  class="dropdown-item" tabindex="-1" href="#"><i class="fa fa-passport" aria-hidden="true"></i> URL</a>
+        <ul class="dropdown-menu">
+          <!-- <li class="dropdown-item"><a tabindex="-1" href="#">aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</a></li> -->
+          <span id="taskURLSpan" class="dropdown-item">Task URL <a href="#" onclick="copy_to_clipboard('taskURLSpan');"><i class="fas fa-copy"></i></a></span>
+        </ul>
+      </li>
+      <li class="dropdown-submenu">
+        <a  class="dropdown-item" tabindex="-1" href="#"><i class="fa fa-calendar-alt" aria-hidden="true"></i>
+          Scheduled Time</a>
+        <ul class="dropdown-menu">
+          <!-- <li class="dropdown-item"><a tabindex="-1" href="#">2021-03-19 12:23</a></li> -->
+          <span class="dropdown-item">2021-03-19 12:23 </span>
+        </ul>
+      </li>
+        
+        <li class="dropdown-submenu">
+          <a  class="dropdown-item" tabindex="-1" href="#"><i class="fab fa-product-hunt" aria-hidden="true"></i> Parameters</a>
+          <ul class="dropdown-menu">
+            <span class="dropdown-item">Parameter 1 </span>
+            <span class="dropdown-item">Parameter 2</span>
+            <span class="dropdown-item">Parameter 3 </span>
+          </ul>
+        </li>
+      </ul>
+</div>
+
+</div>
+  </ul>
+  
+
+  <script src="js/temp.js"></script>
 </body>
 </html>

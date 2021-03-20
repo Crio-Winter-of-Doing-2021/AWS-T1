@@ -8,11 +8,10 @@
 
   <!-- include libraries.ejs -->
   <%- include('../partials/libraries.ejs') %>
+  <!-- custom css -->
+  <link rel="stylesheet" href="/css/styles.css" />
+  <title>Retrieve Task Instances</title>
 
-    <!-- custom css -->
-    <link rel="stylesheet" href="/css/styles.css" />
-
-    <title>Retrieve Task Instances</title>
 </head>
 
 <body>
@@ -32,75 +31,22 @@
           <option value="failed">
         </datalist>
       </div>
-      <button type="submit" class="btn btn-primary button">
+      <button type="submit" class="btn btn-info button">
         Retrieve Tasks
       </button>
     </form>
   </div>
 
   <%if(taskInstance!=""){%>
-    <!-- map to store buttonType and divColor of for styling various task states -->
-      <%let mp=new Map();%>
-      <%mp.set('scheduled',{buttonType:'primary',divColor:'#e4fbff'});%>
-      <%mp.set('completed',{buttonType:'success',divColor:'#9ecca4'});%>
-      <%mp.set('running',{buttonType:'warning',divColor:'#fff9b0'});%>
-      <%mp.set('failed',{buttonType:'danger',divColor:'#f5c0c0'});%>
-      <%mp.set('cancelled',{buttonType:'dark',divColor:'#c8c6a7'});%>
-      <%let divColor=mp.get(taskInstance).divColor;%>
-      <%if(results.length==0){%>
-      <h1 style="text-align: center; margin: 40px;">There are no tasks in <%=taskInstance%> state.</h1>
-  <%}else{%>
-      <h1 style="text-align: center;color: brown;">
-        <%=taskInstance%> Tasks
-      </h1>
-      <%}%>
-        <div class="tableContainer">
-          <%for(var i=0;i<results.length;i++){%>
-            <div class="container taskDetailsWrapper" style="background-color: <%=divColor%>;">
-              <div style="color: blue;text-align: right;">
-                <strong>
-                  <%=results[i].scheduledTime%>
-                </strong>
-              </div>
-              <div style="border: 2px solid black;" id="taskDetails">
-                
-                <!-- task details -->
-                <strong>TaskName:</strong> <span style="padding-left: 20px;">
-                  <%=results[i].taskName%>
-                </span><br>
-                <strong>TaskId:</strong> <span style="padding-left: 48px;">
-                  <%=results[i]._id%>
-                </span><br>
-                <strong>LambdaURL:</strong> <span style="padding-left: 6px;">
-                  <%=results[i].lambdaURL%>
-                </span><br>
-                <!-- end task details -->
+    
 
-                <%var params=results[i].parameters;%>
-                <!-- parameters drop down -->
-                  <%if(params.length>2){%>
-                    <%params=params.substring(1,params.length-1);%>
-                    <%params=params.split(",");%>
-                    <div class="dropdown show">
-                      <a class="btn btn-outline-primary btn-sm  dropdown-toggle" href="#"
-                        role="button" id="dropdownMenuLink" data-toggle="dropdown"
-                        aria-haspopup="true" aria-expanded="false">
-                        Parameters
-                      </a>
-                      <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                        <%for(var j=0;j<params.length;j++){%>
-                          <a class="dropdown-item" href="#">
-                            <%=params[j]%>
-                          </a>
-                          <%}%>
-                      </div>
-                    </div>
-                  <%}%>
-                  <!-- end of parameters drop down -->
-              </div>
-            </div>
-            <%}%>
-    <%}%>
+      <%if(results.length==0){%>
+        <h1 style="text-align: center; margin: 40px;">There are no tasks in <%=taskInstance%> state.</h1>
+      <%}%>
+      <div class="tableContainer">
+        <%- include('../partials/taskDetails.ejs'); %>
+      </div>
+  <%}%>
 </div>
 <script>
   $("#retrieveTasks").validate();
