@@ -5,8 +5,7 @@ const axios = require("axios");
 module.exports.retries = function(id,conditionCheckRetries,timeDelayForRetries,conditionCheckURL,secondTaskURL,fallbackTaskURL){
     const TaskModel = orchestrator.TaskModel;
     let tasks = orchestrator.tasks;
-    var conditionCheck = setInterval(function(){
-        
+    setTimeout(function(){
         if(conditionCheckRetries>0)
         {
             console.log(conditionCheckRetries);
@@ -27,27 +26,29 @@ module.exports.retries = function(id,conditionCheckRetries,timeDelayForRetries,c
                     {
                         DB.updateTaskState(TaskModel,id,'second-task completed');
                         console.log('second task executed');
-                        tasks.delete(id);
-                        clearInterval(conditionCheck);
                     },
                     (error)=>{
                         DB.updateTaskState(TaskModel,id,'second-task failed');
                         console.log('error in executing second task');
+                        //recursive statement
+                        retries(id,conditionCheckRetries-1,timeDelayForRetries,conditionCheckURL,secondTaskURL,fallbackTaskURL);
                     });
                 }
                 else{
                     DB.updateTaskState(TaskModel,id,'condition-check-task condtion-failure');
+                    //recursive statement
+                    retries(id,conditionCheckRetries-1,timeDelayForRetries,conditionCheckURL,secondTaskURL,fallbackTaskURL);
                 }
             },
             (error)=>{
                 DB.updateTaskState(TaskModel,id,'condition-check-task failed');
                 console.log('error in executing condition check');
+                //recursive statement
+                retries(id,conditionCheckRetries-1,timeDelayForRetries,conditionCheckURL,secondTaskURL,fallbackTaskURL)
             });
         }
         else
         {
-            clearInterval(conditionCheck);
-            tasks.delete(id);
             DB.updateTaskState(TaskModel,id,'fallback-task running');
             axios.get(fallbackTaskURL)
             .then((response)=>
