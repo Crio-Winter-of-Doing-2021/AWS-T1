@@ -25,7 +25,7 @@
             <ul class="dropdown-menu multi-level" role="menu" aria-labelledby="dropdownMenu">
     
                 <li class="dropdown-submenu" >
-                    <a  class="dropdown-item" tabindex="-1"> Task Name </a>
+                    <a  class="dropdown-item" tabindex="-1"><i class="fab fa-tumblr-square"></i> Task Name </a>
                     <ul class="dropdown-menu taskDetail">
                         <span id="taskNameSpan<%=i%>" class="dropdown-item"><a href="#" onclick="copy_to_clipboard('taskNameSpan<%=i%>');"><i class="fas fa-copy"></i></a> <%=results[i].taskName%> </span>
                     </ul>
@@ -37,7 +37,7 @@
                     </ul>
                 </li>
                 <li class="dropdown-submenu">
-                    <a  class="dropdown-item" tabindex="-1"><i class="fa fa-passport" aria-hidden="true"></i> Lambda URL</a>
+                    <a  class="dropdown-item" tabindex="-1"><i class="fas fa-globe" aria-hidden="true"></i> Lambda URL</a>
                     <ul class="dropdown-menu taskDetail" >
                         <span  id="taskURLSpan<%=i%>" class="dropdown-item" ><a href="#" onclick="copy_to_clipboard('taskURLSpan<%=i%>');"><i class="fas fa-copy"></i></a> <%=results[i].lambdaURL%> </span>
                     </ul>
@@ -47,6 +47,20 @@
                     Scheduled Time</a>
                     <ul class="dropdown-menu taskDetail">
                         <span class="dropdown-item"><%=results[i].scheduledTime%> </span>
+                    </ul>
+                </li>
+                <li class="dropdown-submenu">
+                    <a  class="dropdown-item" tabindex="-1" ><i class="fab fa-cuttlefish" aria-hidden="true"></i>
+                    Retries Count</a>
+                    <ul class="dropdown-menu taskDetail">
+                        <span class="dropdown-item"><%=results[i].retriesCount%> </span>
+                    </ul>
+                </li>
+                <li class="dropdown-submenu">
+                    <a  class="dropdown-item" tabindex="-1" ><i class="fas fa-stopwatch" aria-hidden="true"></i>
+                    Retry Delay</a>
+                    <ul class="dropdown-menu taskDetail">
+                        <span class="dropdown-item"><%=results[i].timeDelayBetweenRetries%> ms</span>
                     </ul>
                 </li>
                 <%var params=results[i].parameters;%>

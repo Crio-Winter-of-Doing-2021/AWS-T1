@@ -43,39 +43,80 @@ module.exports.setFlashMessage = function (req, type, intro, message) {
   };
 };
 
+function retry(id, url, params,retriesCount,timeDelayBetweenRetries)
+{
+  console.log('in retry '+retriesCount);
+  axios.get(url,{
+      params:params
+    })
+    .then((response)=>
+    {
+      const TaskModel = scheduler.TaskModel;
+      let tasks = scheduler.tasks;
+      console.log("Task " + id + "  deleted succefully from map tasks");
+      //update in database taskState to completed
+      DB.updateTaskState(TaskModel, id, "completed");
+      console.log("successfully executed lambda after retries and remaining retries are "+retriesCount);
+      console.log("Response after execution");
+      console.log(response);
+    },
+    (error) => {
+      console.log('error '+retriesCount);
+      retriesCount-=1;
+      if(retriesCount>0)
+      {
+        console.log('waiting '+retriesCount);
+        setTimeout(function(){
+          console.log('waiting complete '+retriesCount);
+          console.log('calling retry '+retriesCount);
+          retry(id, url, params,retriesCount,timeDelayBetweenRetries);
+        },timeDelayBetweenRetries);
+      }
+      else{
+        const TaskModel = scheduler.TaskModel;
+        let tasks = scheduler.tasks;
+        console.log("Task " + id + "  deleted succefully from map tasks");
+        DB.updateTaskState(TaskModel, id, "failed");
+        console.log("All retries exhausted!! Task Failed!");
+      }
+    })
+} 
+
 //Execute Lambda function
-module.exports.executeAWSLambda = function (id, url, params) {
+module.exports.executeAWSLambda = function (id, url, params,retriesCount,timeDelayBetweenRetries) {
+  
   const TaskModel = scheduler.TaskModel;
   let tasks = scheduler.tasks;
   //update in database taskState to running
   DB.updateTaskState(TaskModel, id, "running");
+  //delete task from tasks map as lambda has triggered already and task cannot be 
+  //deleted or modified
+  tasks.delete(id);
   axios.get(url, {
     params:params
   }).then(
     (response) => {
-      //edge case: immediately executing tasks i.e timeDelay 0ms
-      if (tasks.has(id)) {
-        //update in database taskState to completed
-        DB.updateTaskState(TaskModel, id, "completed");
-        console.log("Task " + id + "  deleted succefully from map tasks");
-        tasks.delete(id);
-        console.log("successfully executed lambda");
-        console.log("Response after execution");
-        console.log(response);
-      } else {
-        console.log("Task with taskId " + id + " could not be executed");
-      }
+      //update in database taskState to completed
+      DB.updateTaskState(TaskModel, id, "completed");
+      console.log("Task " + id + "  deleted succefully from map tasks");
+      console.log("successfully executed lambda without retries");
+      console.log("Response after execution");
+      console.log(response);
     },
     (error) => {
-      if (tasks.has(id)) {
-        tasks.delete(id);
+      console.log('error in executing lambda!! Retry');
+      if(retriesCount>0)
+      {
+        console.log('waiting '+retriesCount);
+        setTimeout(function(){
+          console.log('waiting complete '+retriesCount);
+          console.log('calling retry');
+          retry(id, url, params,retriesCount,timeDelayBetweenRetries);
+        },timeDelayBetweenRetries);
+      }
+      else{
         console.log("Task " + id + "  deleted succefully from map tasks");
-        //update in database taskState to failed
         DB.updateTaskState(TaskModel, id, "failed");
-        console.log("error occured while executing task");
-        console.log(error);
-      } else {
-        console.log("Task with taskId " + id + " could not be executed");
       }
     }
   );

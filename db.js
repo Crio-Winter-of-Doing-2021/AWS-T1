@@ -27,6 +27,8 @@ module.exports.createSchedulerCollection = function () {
     taskName:String,
     lambdaURL: String,
     scheduledTime:String,
+    retriesCount: Number,
+    timeDelayBetweenRetries: Number,
     parameters:String,
     taskState: String
   });

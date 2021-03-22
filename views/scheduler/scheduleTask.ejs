@@ -85,6 +85,18 @@
         </div>
         <!-- end of query parameter -->
 
+        <!-- Retries -->
+        <div class="form-row">
+          <div class="form-group col-md-6">
+            <label for="retriesCount">Retries</label>
+            <input type="number" class="form-control" name='retriesCount' min='0' placeholder="Enter retries count" required>
+          </div>
+          <div class="form-group col-md-6">
+            <label for="timeDelayBetweenRetries">Time Delay Between Retries</label>
+            <input type="number" class="form-control" name="timeDelayBetweenRetries" min='0'  placeholder="Time Delay In Milliseconds" required>
+          </div>
+        </div>
+        <!-- End of retries -->
         <!-- Time Delay -->
         <div class="form-group">
           <label for="delayTime">Scheduling Time</label>
@@ -101,7 +113,7 @@
         <!-- end submit button -->
       </form>
     </div>
-    <script src="js/schedule.js"></script>
+    <script src="js/scheduleTask.js"></script>
     <script src="js/timeUtils.js"></script>
   </body>
 </html>
