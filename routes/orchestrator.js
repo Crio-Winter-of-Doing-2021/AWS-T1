@@ -89,19 +89,22 @@ router.post("/orchestrate",function(req,res){
                                     },
                                     (error)=>{
                                         DB.updateTaskState(TaskModel,id,'second-task failed');
-                                        utils.retries(id,conditionCheckRetries,timeDelayForRetries,conditionCheckURL,secondTaskURL,fallbackTaskURL);
                                         console.log('error in executing second task');
+                                        if(conditionCheckRetries>0)
+                                            utils.retries(id,conditionCheckRetries,timeDelayForRetries,conditionCheckURL,secondTaskURL,fallbackTaskURL);
                                     });
                                 }
                                 else{
                                     DB.updateTaskState(TaskModel,id,'condition-check-task condition-failure');
-                                    utils.retries(id,conditionCheckRetries,timeDelayForRetries,conditionCheckURL,secondTaskURL,fallbackTaskURL);
+                                    if(conditionCheckRetries>0)
+                                        utils.retries(id,conditionCheckRetries,timeDelayForRetries,conditionCheckURL,secondTaskURL,fallbackTaskURL);
                                 }
                             },
                             (error)=>{
                                 DB.updateTaskState(TaskModel,id,'condition-check-task failed');
                                 console.log('error in executing condition check');
-                                utils.retries(id,conditionCheckRetries,timeDelayForRetries,conditionCheckURL,secondTaskURL,fallbackTaskURL);
+                                if(conditionCheckRetries>0)
+                                    utils.retries(id,conditionCheckRetries,timeDelayForRetries,conditionCheckURL,secondTaskURL,fallbackTaskURL);
                             });
                         },timeDelayForConditionCheck);
                     },
