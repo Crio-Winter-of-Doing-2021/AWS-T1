@@ -4,6 +4,9 @@ const DB = require("../db.js");
 
 /*********************** helper functions ************************/
 
+const TaskModel = scheduler.TaskModel;
+let tasks = scheduler.tasks;
+
 //retrieves parameters passed with the scheduled task in endpoint /schedule
 module.exports.getParams = function (req) {
   let ind = 0;
@@ -45,25 +48,29 @@ module.exports.setFlashMessage = function (req, type, intro, message) {
 
 function retry(id, url, params,retriesCount,timeDelayBetweenRetries)
 {
-  console.log('in retry '+retriesCount);
-  axios.get(url,{
+  if(tasks.has(id))
+  {
+    console.log('in retry '+retriesCount);
+    axios.get(url,{
       params:params
     })
     .then((response)=>
     {
-      const TaskModel = scheduler.TaskModel;
-      let tasks = scheduler.tasks;
-      console.log("Task " + id + "  deleted succefully from map tasks");
-      //update in database taskState to completed
-      DB.updateTaskState(TaskModel, id, "completed");
-      console.log("successfully executed lambda after retries and remaining retries are "+retriesCount);
-      console.log("Response after execution");
-      console.log(response);
+      if(tasks.has(id))
+      {
+        tasks.delete(id);
+        console.log("Task " + id + "  deleted succefully from map tasks");
+        //update in database taskState to completed
+        DB.updateTaskState(TaskModel, id, "completed");
+        console.log("successfully executed lambda after retries and remaining retries are "+retriesCount);
+        console.log("Response after execution");
+        console.log(response);
+      }
     },
     (error) => {
       console.log('error '+retriesCount);
       retriesCount-=1;
-      if(retriesCount>0)
+      if(retriesCount>0&&tasks.has(id))
       {
         console.log('waiting '+retriesCount);
         setTimeout(function(){
@@ -73,13 +80,17 @@ function retry(id, url, params,retriesCount,timeDelayBetweenRetries)
         },timeDelayBetweenRetries);
       }
       else{
-        const TaskModel = scheduler.TaskModel;
-        let tasks = scheduler.tasks;
-        console.log("Task " + id + "  deleted succefully from map tasks");
-        DB.updateTaskState(TaskModel, id, "failed");
-        console.log("All retries exhausted!! Task Failed!");
+        if(tasks.has(id))
+        {
+          tasks.delete(id);
+          console.log("Task " + id + "  deleted succefully from map tasks");
+          DB.updateTaskState(TaskModel, id, "failed");
+          console.log("All retries exhausted!! Task Failed!");
+        }
       }
     })
+  }
+  
 } 
 
 //Execute Lambda function
