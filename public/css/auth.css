@@ -9,6 +9,9 @@ html,body {
 h4{
 	font-weight: bold;
 }
+label{
+	font-weight: bold;
+}
 
 body.my-login-page {
 	background-color: #f7f9fb;

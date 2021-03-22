@@ -45,15 +45,13 @@ module.exports.setFlashMessage = function (req, type, intro, message) {
 
 function retry(id, url, params,retriesCount,timeDelayBetweenRetries)
 {
+  const TaskModel = scheduler.TaskModel;
   console.log('in retry '+retriesCount);
   axios.get(url,{
       params:params
     })
     .then((response)=>
     {
-      const TaskModel = scheduler.TaskModel;
-      let tasks = scheduler.tasks;
-      console.log("Task " + id + "  deleted succefully from map tasks");
       //update in database taskState to completed
       DB.updateTaskState(TaskModel, id, "completed");
       console.log("successfully executed lambda after retries and remaining retries are "+retriesCount);
@@ -61,21 +59,19 @@ function retry(id, url, params,retriesCount,timeDelayBetweenRetries)
       console.log(response);
     },
     (error) => {
-      console.log('error '+retriesCount);
+      console.log('error in executing lambda in retry'+retriesCount);
       retriesCount-=1;
       if(retriesCount>0)
       {
-        console.log('waiting '+retriesCount);
+        console.log('retry delay of retry '+retriesCount);
         setTimeout(function(){
-          console.log('waiting complete '+retriesCount);
+          console.log('completed retry delay of retry '+retriesCount);
           console.log('calling retry '+retriesCount);
           retry(id, url, params,retriesCount,timeDelayBetweenRetries);
         },timeDelayBetweenRetries);
       }
       else{
-        const TaskModel = scheduler.TaskModel;
-        let tasks = scheduler.tasks;
-        console.log("Task " + id + "  deleted succefully from map tasks");
+        
         DB.updateTaskState(TaskModel, id, "failed");
         console.log("All retries exhausted!! Task Failed!");
       }
@@ -90,15 +86,15 @@ module.exports.executeAWSLambda = function (id, url, params,retriesCount,timeDel
   //update in database taskState to running
   DB.updateTaskState(TaskModel, id, "running");
   //delete task from tasks map as lambda has triggered already and task cannot be 
-  //deleted or modified
+  //deleted or modified after lambda has been triggered TODO: can be cancelled till it is not complete
   tasks.delete(id);
+  console.log('successfully deleted task with id '+id +' from tasks map');
   axios.get(url, {
     params:params
   }).then(
     (response) => {
       //update in database taskState to completed
       DB.updateTaskState(TaskModel, id, "completed");
-      console.log("Task " + id + "  deleted succefully from map tasks");
       console.log("successfully executed lambda without retries");
       console.log("Response after execution");
       console.log(response);
@@ -107,15 +103,14 @@ module.exports.executeAWSLambda = function (id, url, params,retriesCount,timeDel
       console.log('error in executing lambda!! Retry');
       if(retriesCount>0)
       {
-        console.log('waiting '+retriesCount);
+        console.log('retry delay of retry '+retriesCount);
         setTimeout(function(){
-          console.log('waiting complete '+retriesCount);
-          console.log('calling retry');
+          console.log('completed retry delay of retry '+retriesCount);
+          console.log('calling retry '+retriesCount);
           retry(id, url, params,retriesCount,timeDelayBetweenRetries);
         },timeDelayBetweenRetries);
       }
       else{
-        console.log("Task " + id + "  deleted succefully from map tasks");
         DB.updateTaskState(TaskModel, id, "failed");
       }
     }

@@ -126,7 +126,8 @@ router.post("/schedule", function (req, res) {
         let id = result._id.toString();
         console.log("successfully updated taskState to scheduled of task with id "+id);
         //store task details in taskDetails map
-        taskDetails.set(id,{url:url,params:params});
+        taskDetails.set(id,{url:url,params:params,
+                        retriesCount:retriesCount,timeDelayBetweenRetries:timeDelayBetweenRetries});
         // schedule the aws lambda task
         var task = setTimeout(function () {
           utils.executeAWSLambda(id, url, params,retriesCount,timeDelayBetweenRetries);
@@ -275,17 +276,21 @@ router.post("/modify",function(req,res){
             //retrieve task details from taskDetails map 
             let url = taskDetails.get(taskId).url;
             let params = taskDetails.get(taskId).params;
+            let retriesCount = taskDetails.get(taskId).retriesCount;
+            let timeDelayBetweenRetries = taskDetails.get(taskId).timeDelayBetweenRetries;
             console.log('url '+url);
             console.log('params '+JSON.stringify(params));
+            console.log('retriesCount '+retriesCount);
+            console.log('timeDelayBetweenRetries '+timeDelayBetweenRetries);
             //cancel previously scheduled task
             clearTimeout(tasks.get(taskId));
             // schedule a new aws lambda task with same url and params as previous task
             var task = setTimeout(function () {
-              utils.executeAWSLambda(taskId, url, params);
+              utils.executeAWSLambda(taskId, url, params,retriesCount,timeDelayBetweenRetries);
             }, timeDelay);
             //update tasks map with the new task
             tasks.set(taskId, task);
-            console.log("successfully modified task with "+taskId+" to timedelay "+timeDelay);
+            console.log("successfully modified task with id "+taskId+" to timedelay "+timeDelay);
             utils.setFlashMessage(
               req,
               "success",
