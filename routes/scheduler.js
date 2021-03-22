@@ -78,12 +78,16 @@ router.post("/schedule", function (req, res) {
     const url = req.body.URL;
     const scheduledDate = req.body.datefield;
     const scheduledTime = req.body.timefield;
+    const retriesCount = req.body.retriesCount;
+    const timeDelayBetweenRetries = req.body.timeDelayBetweenRetries;
     //get parameters passed with task
     let params = utils.getParams(req);
     const taskState = "";
     console.log("url: " + url);
     console.log("schedluedDate: " + scheduledDate);
     console.log("scheduledTime: "+scheduledTime);
+    console.log("retries count "+retriesCount);
+    console.log("time delay between retries "+timeDelayBetweenRetries);
     //calculate time delay from provided scheduled date and time
     var presentTimeInMsSinceEpoch = Date.now();
     let time = scheduledDate+" "+scheduledTime;
@@ -101,6 +105,8 @@ router.post("/schedule", function (req, res) {
       taskName: taskName,
       lambdaURL: url,
       scheduledTime:time,
+      retriesCount: retriesCount,
+      timeDelayBetweenRetries: timeDelayBetweenRetries,
       parameters: JSON.stringify(params),
       taskState: "scheduled",
     });
@@ -123,7 +129,7 @@ router.post("/schedule", function (req, res) {
         taskDetails.set(id,{url:url,params:params});
         // schedule the aws lambda task
         var task = setTimeout(function () {
-          utils.executeAWSLambda(id, url, params);
+          utils.executeAWSLambda(id, url, params,retriesCount,timeDelayBetweenRetries);
         }, timeDelay);
         tasks.set(id, task);
         //print tasks map
@@ -206,7 +212,7 @@ router.post("/cancel", function (req, res) {
             utils.setFlashMessage(
               req,
               "danger",
-              "Already Executed",
+              "Lambda already triggered",
               "Task with id " + taskId + " cannot be Deleted."
             );
           }
@@ -269,8 +275,8 @@ router.post("/modify",function(req,res){
             //retrieve task details from taskDetails map 
             let url = taskDetails.get(taskId).url;
             let params = taskDetails.get(taskId).params;
-            console.log(url);
-            console.log(JSON.stringify(params));
+            console.log('url '+url);
+            console.log('params '+JSON.stringify(params));
             //cancel previously scheduled task
             clearTimeout(tasks.get(taskId));
             // schedule a new aws lambda task with same url and params as previous task
@@ -290,7 +296,7 @@ router.post("/modify",function(req,res){
             utils.setFlashMessage(
               req,
               "danger",
-              "Already Executed",
+              "Lambda already triggered",
               "Task with id " + taskId + " cannot be Modified."
             );
           }
