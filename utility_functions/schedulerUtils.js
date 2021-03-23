@@ -43,6 +43,7 @@ module.exports.setFlashMessage = function (req, type, intro, message) {
   };
 };
 
+/* retry executing lambda */
 function retry(id, url, params,retriesCount,timeDelayBetweenRetries)
 {
   const TaskModel = scheduler.TaskModel;

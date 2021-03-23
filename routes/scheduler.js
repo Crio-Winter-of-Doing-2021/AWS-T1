@@ -236,7 +236,6 @@ router.post("/cancel", function (req, res) {
 router.post("/modify",function(req,res){
   if (req.isAuthenticated()) {
     let taskId = req.body.taskId;
-   
     TaskModel.findById(taskId, function (err, result) {
       if (err) {
         //helper function defined below
@@ -265,6 +264,7 @@ router.post("/modify",function(req,res){
             //calculate time delay from provided scheduled date and time
             var presentTimeInMsSinceEpoch = Date.now();
             let time = modifiedDate+" "+modifiedTime;
+            DB.modifyTaskScheduledTime(TaskModel,taskId,time);
             var modifiedTimeInMsSinceEpoch = Date.parse(time);
             var timeDelay = modifiedTimeInMsSinceEpoch - presentTimeInMsSinceEpoch;
             console.log("delay in Ms "+ timeDelay);

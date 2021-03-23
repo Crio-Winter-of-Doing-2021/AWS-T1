@@ -74,3 +74,21 @@ module.exports.updateTaskState = function (TaskModel, id, taskState) {
     }
   );
 };
+
+module.exports.modifyTaskScheduledTime = function (TaskModel, id, scheduledTime) {
+  TaskModel.findByIdAndUpdate(
+    id,
+    { scheduledTime: scheduledTime },
+    function (err, result) {
+      if (err) {
+        console.log(
+          "could not update to scheduledTime " + scheduledTime + " of taskId " + id
+        );
+      } else {
+        console.log(
+          "successfully updated scheuldedTime to " + scheduledTime + " of taskId " + id
+        );
+      }
+    }
+  );
+};

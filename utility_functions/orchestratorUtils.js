@@ -2,7 +2,7 @@ const DB = require("../db.js");
 const orchestrator = require("../routes/orchestrator");
 const axios = require("axios");
 
-
+/*Retry orchestration */
 function retries(id,conditionCheckRetries,timeDelayForRetries,timeDelayForConditionCheck,conditionCheckURL,secondTaskURL,fallbackTaskURL){
     const TaskModel = orchestrator.TaskModel;
     let tasks = orchestrator.tasks;
@@ -67,6 +67,7 @@ function retries(id,conditionCheckRetries,timeDelayForRetries,timeDelayForCondit
     },timeDelayForRetries);  
 }
 
+/* perform orchestration */
 module.exports.executeOrchestration = function(id,conditionCheckRetries,timeDelayForRetries,timeDelayForConditionCheck,conditionCheckURL,firstTaskURL,secondTaskURL,fallbackTaskURL){
     const TaskModel = orchestrator.TaskModel;
     let tasks = orchestrator.tasks;
@@ -116,7 +117,7 @@ module.exports.executeOrchestration = function(id,conditionCheckRetries,timeDela
 
 /*
     sets flash message
-  */
+*/
 module.exports.setFlashMessage = function (req, type, intro, message) {
     req.session.message = {
         type: type,
