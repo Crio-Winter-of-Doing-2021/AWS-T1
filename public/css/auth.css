@@ -3,7 +3,7 @@ html,body {
 	height: 100%;
 	font-family: 'Roboto', sans-serif;
 	/* background-color:red; */
-	background-image: url(https://thumbs.dreamstime.com/b/yellow-maple-leaves-seamless-pattern-light-background-vintage-autumn-leaf-wallpaper-decorative-backdrop-fabric-design-186639799.jpg);
+	background-image: url('/images/authBG.jpg');
 }
 
 h4{
