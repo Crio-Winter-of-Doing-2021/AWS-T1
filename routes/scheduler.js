@@ -28,9 +28,9 @@ router.get("/schedule", function (req, res) {
   }
 });
 
-router.get("/retrieve-task-instances", function (req, res) {
+router.get("/retrieve-tasks", function (req, res) {
   if (req.isAuthenticated()) {
-    res.render("scheduler/retrieveTaskInstances", {
+    res.render("scheduler/retrieveTasks", {
       taskInstance: "",
       results: [],
     });
@@ -55,22 +55,7 @@ router.get("/modify",function(req,res){
   }
 });
 
-router.get("/retrieve-all-tasks", function (req, res) {
-  if (req.isAuthenticated()) {
-    TaskModel.find({ username: req.user.username }, function (err, results) {
-      if (err) {
-        console.log(err);
-        res.redirect("/retrieve-all-tasks");
-      } else {
-        res.render("scheduler/retrieveAllTasks", {
-          results: results,
-        });
-      }
-    });
-  } else {
-    res.redirect("/login");
-  }
-});
+
 
 router.post("/schedule", function (req, res) {
   if (req.isAuthenticated()) {
@@ -153,23 +138,39 @@ router.post("/schedule", function (req, res) {
   }
 });
 
-router.post("/retrieve-task-instances", function (req, res) {
+router.post("/retrieve-tasks", function (req, res) {
   if (req.isAuthenticated()) {
-    let taskState = req.body.taskState;
-    TaskModel.find(
-      { username: req.user.username, taskState: taskState },
-      function (err, results) {
+    let taskInstance = req.body.taskInstance;
+    if(taskInstance=="All")
+    {
+      TaskModel.find({ username: req.user.username }, function (err, results) {
         if (err) {
           console.log(err);
-          res.redirect("/retrieve-task-instances");
+          res.redirect("/retrieve-tasks");
         } else {
-          res.render("scheduler/retrieveTaskInstances", {
-            taskInstance: taskState,
+          res.render("scheduler/retrieveTasks", {
+            taskInstance: taskInstance,
             results: results,
           });
         }
-      }
-    );
+      });
+    }
+    else{
+      TaskModel.find(
+        { username: req.user.username, taskState: taskInstance },
+        function (err, results) {
+          if (err) {
+            console.log(err);
+            res.redirect("/retrieve-tasks");
+          } else {
+            res.render("scheduler/retrieveTasks", {
+              taskInstance: taskInstance,
+              results: results,
+            });
+          }
+        }
+      );
+    }
   } else {
     res.redirect("/login");
   }
