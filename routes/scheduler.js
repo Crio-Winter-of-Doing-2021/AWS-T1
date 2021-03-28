@@ -143,7 +143,7 @@ router.post("/retrieve-tasks", function (req, res) {
     let taskInstance = req.body.taskInstance;
     if(taskInstance=="All")
     {
-      TaskModel.find({ username: req.user.username }, function (err, results) {
+      TaskModel.find({}, function (err, results) {
         if (err) {
           console.log(err);
           res.redirect("/retrieve-tasks");
@@ -179,13 +179,15 @@ router.post("/retrieve-tasks", function (req, res) {
 router.post("/cancel", function (req, res) {
   if (req.isAuthenticated()) {
     let taskId = req.body.taskId;
+    //remove extra spaces from taskId
+    taskId = taskId.trim();
     TaskModel.findById(taskId, function (err, result) {
       if (err) {
         utils.setFlashMessage(
           req,
           "danger",
-          "",
-          "Error occured! please try again"
+          "Error",
+          "Invalid Task Id! please try again"
         );
       } else if (result == null) {
         utils.setFlashMessage(
@@ -237,14 +239,16 @@ router.post("/cancel", function (req, res) {
 router.post("/modify",function(req,res){
   if (req.isAuthenticated()) {
     let taskId = req.body.taskId;
+    //remove extra spaces from taskId
+    taskId = taskId.trim();
     TaskModel.findById(taskId, function (err, result) {
       if (err) {
         //helper function defined below
         utils.setFlashMessage(
           req,
           "danger",
-          "",
-          "Error occured! please try again"
+          "Error",
+          "Invalid Task Id! please try again"
         );
       } else if (result == null) {
         utils.setFlashMessage(

@@ -104,9 +104,10 @@ module.exports.executeAWSLambda = function (id, url, params,retriesCount,timeDel
         DB.updateTaskState(TaskModel, id, "completed");
         console.log("successfully executed lambda without retries");
         console.log("Response after execution");
-        console.log(response);
+        // console.log(response.data);
     },
     (error) => {
+      // console.log(error.data);
       lambdaErrorHandler(id, url, params,retriesCount,timeDelayBetweenRetries);
     }
   );
