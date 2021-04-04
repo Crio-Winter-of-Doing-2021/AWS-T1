@@ -1,22 +1,25 @@
 const express = require("express");
 const utils = require("../utility_functions/schedulerUtils.js");
+const schedulerRecovery = require("../utility_functions/recover");
 const DB = require("../db.js");
 
 const router = express.Router();
 
 //create or return a pre-created scheduler collection
 const TaskModel = DB.createSchedulerCollection();
-
 //tasks maps taskId with its setTimeout() function call
 let tasks = new Map();
 
 //maps taskId with an object containing its lambda-url and paramaters
 let taskDetails = new Map();
 
-//export TaskModel and tasks for use in other files(utils.js)
+//export for use in other files(utils.js/recover.js)
 module.exports.TaskModel = TaskModel;
 module.exports.tasks = tasks;
+module.exports.taskDetails = taskDetails;
 
+//Recover scheduled tasks in case of server crash
+schedulerRecovery.recoverTasks();
 /**************************** Scheduler Routes *******************************/
 
 router.get("/schedule", function (req, res) {
@@ -90,7 +93,7 @@ router.post("/schedule", function (req, res) {
     var scheduleTimeInMsSinceEpoch = Date.parse(time);
     var timeDelay = scheduleTimeInMsSinceEpoch- presentTimeInMsSinceEpoch;
     console.log("delay in Ms "+ timeDelay);
-    //If we provide time which is already<div></div> passed tasks are executed immediately
+    //If we provide time which has already passed task is executed immediately
     if(timeDelay<0)
     {
       timeDelay = 0;
@@ -102,6 +105,7 @@ router.post("/schedule", function (req, res) {
       lambdaURL: url,
       scheduledTime:time,
       retriesCount: retriesCount,
+      retriesLeft: retriesCount,
       timeDelayBetweenRetries: timeDelayBetweenRetries,
       parameters: JSON.stringify(params),
       taskState: "scheduled",

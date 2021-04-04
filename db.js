@@ -28,6 +28,7 @@ module.exports.createSchedulerCollection = function () {
     lambdaURL: String,
     scheduledTime:String,
     retriesCount: Number,
+    retriesLeft:Number,
     timeDelayBetweenRetries: Number,
     parameters:String,
     taskState: String
@@ -74,6 +75,23 @@ module.exports.updateTaskState = function (TaskModel, id, taskState) {
     }
   );
 };
+
+module.exports.updateRetries = function (TaskModel, id, retriesLeft) {
+  TaskModel.findByIdAndUpdate(
+    id,
+    { retriesLeft:retriesLeft},
+    function (err, result) {
+      if (err) {
+        console.log(
+          "could not update to retries left of taskId " + id
+        );
+      } else {
+        console.log('updated retries to '+retriesLeft);
+      }
+    }
+  );
+};
+
 
 module.exports.modifyTaskScheduledTime = function (TaskModel, id, scheduledTime) {
   TaskModel.findByIdAndUpdate(

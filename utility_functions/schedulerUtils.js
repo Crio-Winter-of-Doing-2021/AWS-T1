@@ -54,6 +54,9 @@ function retry(id, url, params,retriesCount,timeDelayBetweenRetries)
     .then((response)=>
     {
       //successful response from server
+      //update retries left in database
+      retriesCount-=1;
+      DB.updateRetries(TaskModel,id,retriesCount);
       //update in database taskState to completed
       DB.updateTaskState(TaskModel, id, "completed");
       console.log("successfully executed lambda after retries and remaining retries are "+retriesCount);
@@ -64,6 +67,8 @@ function retry(id, url, params,retriesCount,timeDelayBetweenRetries)
       //All status codes in 400/500 are handled here
       console.log('error in executing lambda in retry'+retriesCount);
       retriesCount-=1;
+      //update retries left in database
+      DB.updateRetries(TaskModel,id,retriesCount);
       lambdaErrorHandler(id, url, params,retriesCount,timeDelayBetweenRetries);
     })
 } 
@@ -104,7 +109,7 @@ module.exports.executeAWSLambda = function (id, url, params,retriesCount,timeDel
         DB.updateTaskState(TaskModel, id, "completed");
         console.log("successfully executed lambda without retries");
         console.log("Response after execution");
-        console.log(response);
+        console.log(response.data);
     },
     (error) => {
       // console.log(error.data);

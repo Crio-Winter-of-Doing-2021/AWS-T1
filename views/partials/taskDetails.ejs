@@ -58,7 +58,14 @@
                     </ul>
                 </li>
                 <li class="dropdown-submenu">
-                    <a  class="dropdown-item" tabindex="-1" ><i class="fab fa-cuttlefish" aria-hidden="true"></i>
+                    <a  class="dropdown-item" tabindex="-1" ><i class="fas fa-redo"></i>
+                    Retries Left</a>
+                    <ul class="dropdown-menu taskDetail">
+                        <span class="dropdown-item"><%=results[i].retriesLeft%> </span>
+                    </ul>
+                </li>
+                <li class="dropdown-submenu">
+                    <a  class="dropdown-item" tabindex="-1" ><i class="fab fa-cuttlefish"></i>
                     Retries Count</a>
                     <ul class="dropdown-menu taskDetail">
                         <span class="dropdown-item"><%=results[i].retriesCount%> </span>
