@@ -86,7 +86,7 @@ module.exports.updateRetries = function (TaskModel, id, retriesLeft) {
           "could not update to retries left of taskId " + id
         );
       } else {
-        console.log('updated retries to '+retriesLeft);
+        console.log('updated retriesLeft to '+retriesLeft);
       }
     }
   );

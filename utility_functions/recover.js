@@ -7,16 +7,25 @@ module.exports.recoverTasks = function () {
     let tasks = scheduler.tasks;
     let taskDetails = scheduler.taskDetails;
     const TaskModel = scheduler.TaskModel;
-    TaskModel.find({}, function (err, results) {
+    //Retrieve all the tasks which are in scheduled or running tasks irrespective of user
+    TaskModel.find({taskState:{$in: ['scheduled', 'running']}}, function (err, results) {
+        console.log("**** Task Recovery *****");
         if (err) {
           console.log('could not recover tasks');
-        } else {
+        } else 
+        {
+          if(results.length==0){
+            console.log('There are no tasks to be recovered!');
+          }
           for(var i=0;i<results.length;i++)
           {
               var taskState=results[i].taskState;
               if(taskState=='running')
               {
+                //update taskState to failed
                 DB.updateTaskState(TaskModel,results[i]._id,'failed');
+                //update retries left to 0 in database
+                DB.updateRetries(TaskModel,results[i]._id,0);
               }
               else if(taskState=='scheduled')
               {
