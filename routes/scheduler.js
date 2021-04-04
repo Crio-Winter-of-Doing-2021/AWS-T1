@@ -55,7 +55,18 @@ router.get("/modify",function(req,res){
   }
 });
 
+/*
+  input:
+  a) taskName: name of the task
+  b) url: lambda url
+  c) parameters: parameters to be passed to url
+  d) time: schduled date and time
+  e) retriesCount: number of times to retry in case of failure
+  f) timeDelayBetweenRetry: time-delay/wait before retrying
 
+  result:
+  a) schedules the task at the provided scheduled date and time
+*/
 
 router.post("/schedule", function (req, res) {
   if (req.isAuthenticated()) {
@@ -76,8 +87,8 @@ router.post("/schedule", function (req, res) {
     //calculate time delay from provided scheduled date and time
     var presentTimeInMsSinceEpoch = Date.now();
     let time = scheduledDate+" "+scheduledTime;
-    var schedimeInMsSinceEpoch = Date.parse(time);
-    var timeDelay = schedimeInMsSinceEpoch- presentTimeInMsSinceEpoch;
+    var scheduleTimeInMsSinceEpoch = Date.parse(time);
+    var timeDelay = scheduleTimeInMsSinceEpoch- presentTimeInMsSinceEpoch;
     console.log("delay in Ms "+ timeDelay);
     //If we provide time which is already<div></div> passed tasks are executed immediately
     if(timeDelay<0)
@@ -138,6 +149,13 @@ router.post("/schedule", function (req, res) {
   }
 });
 
+/* 
+  retrieve task details from db based on task Instance selected by user 
+  Options:
+  All -> Retrieve all tasks in 'any state irrespective of user' 
+  scheduled, completed, failed, cancelled -> retrieve task in the selected {state}  created by
+                                              'current logged in user'
+*/
 router.post("/retrieve-tasks", function (req, res) {
   if (req.isAuthenticated()) {
     let taskInstance = req.body.taskInstance;
@@ -176,6 +194,12 @@ router.post("/retrieve-tasks", function (req, res) {
   }
 });
 
+/* 
+  input: 
+  a) takes id of task to be cancelled
+  result:
+  a) cancels the task if user is authorised to cancel the task and task has not been triggered already
+*/
 router.post("/cancel", function (req, res) {
   if (req.isAuthenticated()) {
     let taskId = req.body.taskId;
@@ -236,6 +260,13 @@ router.post("/cancel", function (req, res) {
   }
 });
 
+/*
+  inputs:
+  a) task id of the task to be modified
+  b) new modified data and time at which the task has to be scheduled
+  result:
+  a) modifies task if user is authorised to modify the task and task has not been executed already
+*/
 router.post("/modify",function(req,res){
   if (req.isAuthenticated()) {
     let taskId = req.body.taskId;
