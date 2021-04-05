@@ -7,7 +7,6 @@ const DB = require("../db.js");
 const router = express.Router();
 
 const userModel = DB.createUsersCollection();
-
 //authentication middleware
 router.use(passport.initialize());
 router.use(passport.session());

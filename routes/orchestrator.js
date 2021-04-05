@@ -14,7 +14,6 @@ module.exports.TaskModel = TaskModel;
 module.exports.tasks = tasks;
 
 const router = express.Router();
-
 router.get("/orchestrate",function(req,res){
     if(req.isAuthenticated())
     {
@@ -63,56 +62,7 @@ router.post("/orchestrate",function(req,res){
                 let id = result._id.toString();
                 console.log("orchestration successfully scheduled");
                 var task = setTimeout(function () {
-                    DB.updateTaskState(TaskModel,id,'first-task running');
-                    axios.get(firstTaskURL)
-                    .then((response)=>
-                    {
-                        console.log('first task executed successfully');
-                        DB.updateTaskState(TaskModel,id,'first-task completed');
-                        var checkCondition = setTimeout(function(){
-                            DB.updateTaskState(TaskModel,id,'condition-check-task running');
-                            axios.get(conditionCheckURL)
-                            .then((response)=>
-                            {
-                                DB.updateTaskState(TaskModel,id,'condition-check-task completed');
-                                console.log('condition-check-task executed successfully');
-                                console.log(response.data);
-                                if(response.data.conditionSatisfied == 1)
-                                {
-                                    DB.updateTaskState(TaskModel,id,'second-task running');
-                                    axios.get(secondTaskURL)
-                                    .then((response)=>
-                                    {
-                                        DB.updateTaskState(TaskModel,id,'second-task completed');
-                                        console.log('second task executed');
-                                        tasks.delete(id);
-                                    },
-                                    (error)=>{
-                                        DB.updateTaskState(TaskModel,id,'second-task failed');
-                                        console.log('error in executing second task');
-                                        if(conditionCheckRetries>0)
-                                            utils.retries(id,conditionCheckRetries,timeDelayForRetries,conditionCheckURL,secondTaskURL,fallbackTaskURL);
-                                    });
-                                }
-                                else{
-                                    DB.updateTaskState(TaskModel,id,'condition-check-task condition-failure');
-                                    if(conditionCheckRetries>0)
-                                        utils.retries(id,conditionCheckRetries,timeDelayForRetries,conditionCheckURL,secondTaskURL,fallbackTaskURL);
-                                }
-                            },
-                            (error)=>{
-                                DB.updateTaskState(TaskModel,id,'condition-check-task failed');
-                                console.log('error in executing condition check');
-                                if(conditionCheckRetries>0)
-                                    utils.retries(id,conditionCheckRetries,timeDelayForRetries,conditionCheckURL,secondTaskURL,fallbackTaskURL);
-                            });
-                        },timeDelayForConditionCheck);
-                    },
-                    (error) =>{
-                        console.log(error);
-                        DB.updateTaskState(TaskModel,id,'first-task failed');
-                        console.log("failed execution of first task");
-                    });
+                    utils.executeOrchestration(id,conditionCheckRetries,timeDelayForRetries,timeDelayForConditionCheck,conditionCheckURL,firstTaskURL,secondTaskURL,fallbackTaskURL)
                 },initialDelay);
                 tasks.set(id,task);
             }

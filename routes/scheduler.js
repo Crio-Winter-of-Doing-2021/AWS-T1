@@ -1,22 +1,25 @@
 const express = require("express");
 const utils = require("../utility_functions/schedulerUtils.js");
+const schedulerRecovery = require("../utility_functions/recover");
 const DB = require("../db.js");
 
 const router = express.Router();
 
 //create or return a pre-created scheduler collection
 const TaskModel = DB.createSchedulerCollection();
-
 //tasks maps taskId with its setTimeout() function call
 let tasks = new Map();
 
 //maps taskId with an object containing its lambda-url and paramaters
 let taskDetails = new Map();
 
-//export TaskModel and tasks for use in other files(utils.js)
+//export for use in other files(utils.js/recover.js)
 module.exports.TaskModel = TaskModel;
 module.exports.tasks = tasks;
+module.exports.taskDetails = taskDetails;
 
+//Recover scheduled tasks in case of server crash
+schedulerRecovery.recoverTasks();
 /**************************** Scheduler Routes *******************************/
 
 router.get("/schedule", function (req, res) {
@@ -28,9 +31,9 @@ router.get("/schedule", function (req, res) {
   }
 });
 
-router.get("/retrieve-task-instances", function (req, res) {
+router.get("/retrieve-tasks", function (req, res) {
   if (req.isAuthenticated()) {
-    res.render("scheduler/retrieveTaskInstances", {
+    res.render("scheduler/retrieveTasks", {
       taskInstance: "",
       results: [],
     });
@@ -55,22 +58,18 @@ router.get("/modify",function(req,res){
   }
 });
 
-router.get("/retrieve-all-tasks", function (req, res) {
-  if (req.isAuthenticated()) {
-    TaskModel.find({ username: req.user.username }, function (err, results) {
-      if (err) {
-        console.log(err);
-        res.redirect("/retrieve-all-tasks");
-      } else {
-        res.render("scheduler/retrieveAllTasks", {
-          results: results,
-        });
-      }
-    });
-  } else {
-    res.redirect("/login");
-  }
-});
+/*
+  input:
+  a) taskName: name of the task
+  b) url: lambda url
+  c) parameters: parameters to be passed to url
+  d) time: schduled date and time
+  e) retriesCount: number of times to retry in case of failure
+  f) timeDelayBetweenRetry: time-delay/wait before retrying
+
+  result:
+  a) schedules the task at the provided scheduled date and time
+*/
 
 router.post("/schedule", function (req, res) {
   if (req.isAuthenticated()) {
@@ -91,10 +90,10 @@ router.post("/schedule", function (req, res) {
     //calculate time delay from provided scheduled date and time
     var presentTimeInMsSinceEpoch = Date.now();
     let time = scheduledDate+" "+scheduledTime;
-    var schedimeInMsSinceEpoch = Date.parse(time);
-    var timeDelay = schedimeInMsSinceEpoch- presentTimeInMsSinceEpoch;
+    var scheduleTimeInMsSinceEpoch = Date.parse(time);
+    var timeDelay = scheduleTimeInMsSinceEpoch- presentTimeInMsSinceEpoch;
     console.log("delay in Ms "+ timeDelay);
-    //If we provide time which is already<div></div> passed tasks are executed immediately
+    //If we provide time which has already passed task is executed immediately
     if(timeDelay<0)
     {
       timeDelay = 0;
@@ -106,6 +105,7 @@ router.post("/schedule", function (req, res) {
       lambdaURL: url,
       scheduledTime:time,
       retriesCount: retriesCount,
+      retriesLeft: retriesCount,
       timeDelayBetweenRetries: timeDelayBetweenRetries,
       parameters: JSON.stringify(params),
       taskState: "scheduled",
@@ -126,7 +126,8 @@ router.post("/schedule", function (req, res) {
         let id = result._id.toString();
         console.log("successfully updated taskState to scheduled of task with id "+id);
         //store task details in taskDetails map
-        taskDetails.set(id,{url:url,params:params});
+        taskDetails.set(id,{url:url,params:params,
+                        retriesCount:retriesCount,timeDelayBetweenRetries:timeDelayBetweenRetries});
         // schedule the aws lambda task
         var task = setTimeout(function () {
           utils.executeAWSLambda(id, url, params,retriesCount,timeDelayBetweenRetries);
@@ -152,38 +153,69 @@ router.post("/schedule", function (req, res) {
   }
 });
 
-router.post("/retrieve-task-instances", function (req, res) {
+/* 
+  retrieve task details from db based on task Instance selected by user 
+  Options:
+  All -> Retrieve all tasks in 'any state irrespective of user' 
+  scheduled, completed, failed, cancelled -> retrieve task in the selected {state}  created by
+                                              'current logged in user'
+*/
+router.post("/retrieve-tasks", function (req, res) {
   if (req.isAuthenticated()) {
-    let taskState = req.body.taskState;
-    TaskModel.find(
-      { username: req.user.username, taskState: taskState },
-      function (err, results) {
+    let taskInstance = req.body.taskInstance;
+    if(taskInstance=="All")
+    {
+      TaskModel.find({}, function (err, results) {
         if (err) {
           console.log(err);
-          res.redirect("/retrieve-task-instances");
+          res.redirect("/retrieve-tasks");
         } else {
-          res.render("scheduler/retrieveTaskInstances", {
-            taskInstance: taskState,
+          res.render("scheduler/retrieveTasks", {
+            taskInstance: taskInstance,
             results: results,
           });
         }
-      }
-    );
+      });
+    }
+    else{
+      TaskModel.find(
+        { username: req.user.username, taskState: taskInstance },
+        function (err, results) {
+          if (err) {
+            console.log(err);
+            res.redirect("/retrieve-tasks");
+          } else {
+            res.render("scheduler/retrieveTasks", {
+              taskInstance: taskInstance,
+              results: results,
+            });
+          }
+        }
+      );
+    }
   } else {
     res.redirect("/login");
   }
 });
 
+/* 
+  input: 
+  a) takes id of task to be cancelled
+  result:
+  a) cancels the task if user is authorised to cancel the task and task has not been triggered already
+*/
 router.post("/cancel", function (req, res) {
   if (req.isAuthenticated()) {
     let taskId = req.body.taskId;
+    //remove extra spaces from taskId
+    taskId = taskId.trim();
     TaskModel.findById(taskId, function (err, result) {
       if (err) {
         utils.setFlashMessage(
           req,
           "danger",
-          "",
-          "Error occured! please try again"
+          "Error",
+          "Invalid Task Id! please try again"
         );
       } else if (result == null) {
         utils.setFlashMessage(
@@ -232,18 +264,26 @@ router.post("/cancel", function (req, res) {
   }
 });
 
+/*
+  inputs:
+  a) task id of the task to be modified
+  b) new modified data and time at which the task has to be scheduled
+  result:
+  a) modifies task if user is authorised to modify the task and task has not been executed already
+*/
 router.post("/modify",function(req,res){
   if (req.isAuthenticated()) {
     let taskId = req.body.taskId;
-   
+    //remove extra spaces from taskId
+    taskId = taskId.trim();
     TaskModel.findById(taskId, function (err, result) {
       if (err) {
         //helper function defined below
         utils.setFlashMessage(
           req,
           "danger",
-          "",
-          "Error occured! please try again"
+          "Error",
+          "Invalid Task Id! please try again"
         );
       } else if (result == null) {
         utils.setFlashMessage(
@@ -264,6 +304,7 @@ router.post("/modify",function(req,res){
             //calculate time delay from provided scheduled date and time
             var presentTimeInMsSinceEpoch = Date.now();
             let time = modifiedDate+" "+modifiedTime;
+            DB.modifyTaskScheduledTime(TaskModel,taskId,time);
             var modifiedTimeInMsSinceEpoch = Date.parse(time);
             var timeDelay = modifiedTimeInMsSinceEpoch - presentTimeInMsSinceEpoch;
             console.log("delay in Ms "+ timeDelay);
@@ -275,17 +316,21 @@ router.post("/modify",function(req,res){
             //retrieve task details from taskDetails map 
             let url = taskDetails.get(taskId).url;
             let params = taskDetails.get(taskId).params;
+            let retriesCount = taskDetails.get(taskId).retriesCount;
+            let timeDelayBetweenRetries = taskDetails.get(taskId).timeDelayBetweenRetries;
             console.log('url '+url);
             console.log('params '+JSON.stringify(params));
+            console.log('retriesCount '+retriesCount);
+            console.log('timeDelayBetweenRetries '+timeDelayBetweenRetries);
             //cancel previously scheduled task
             clearTimeout(tasks.get(taskId));
             // schedule a new aws lambda task with same url and params as previous task
             var task = setTimeout(function () {
-              utils.executeAWSLambda(taskId, url, params);
+              utils.executeAWSLambda(taskId, url, params,retriesCount,timeDelayBetweenRetries);
             }, timeDelay);
             //update tasks map with the new task
             tasks.set(taskId, task);
-            console.log("successfully modified task with "+taskId+" to timedelay "+timeDelay);
+            console.log("successfully modified task with id "+taskId+" to timedelay "+timeDelay);
             utils.setFlashMessage(
               req,
               "success",

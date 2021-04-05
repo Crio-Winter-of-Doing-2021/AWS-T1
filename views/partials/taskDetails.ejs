@@ -33,9 +33,17 @@
                 <li class="dropdown-submenu">
                     <a  class="dropdown-item" tabindex="-1" ><i class="fa fa-fingerprint" aria-hidden="true"></i> Task Id</a>
                     <ul class="dropdown-menu taskDetail">
-                        <span  id="taskIdSpan<%=i%> " class="dropdown-item"><a href="#" onclick="copy_to_clipboard('taskIdSpan<%=i%>');"><i class="fas fa-copy"></i></a> <%=results[i]._id%> </span>
+                        <span  id="taskIdSpan<%=i%>" class="dropdown-item"><a href="#" onclick="copy_to_clipboard('taskIdSpan<%=i%>');"><i class="fas fa-copy"></i></a> <%=results[i]._id%> </span>
                     </ul>
                 </li>
+                <%if(taskInstance=="All"){%>
+                    <li class="dropdown-submenu">
+                        <a  class="dropdown-item" tabindex="-1" ><i class="far fa-user"></i>Scheduled By</a>
+                        <ul class="dropdown-menu taskDetail">
+                            <span  class="dropdown-item"><a href="#"></a> <%=results[i].username%> </span>
+                        </ul>
+                    </li>
+                <%}%>
                 <li class="dropdown-submenu">
                     <a  class="dropdown-item" tabindex="-1"><i class="fas fa-globe" aria-hidden="true"></i> Lambda URL</a>
                     <ul class="dropdown-menu taskDetail" >
@@ -50,7 +58,14 @@
                     </ul>
                 </li>
                 <li class="dropdown-submenu">
-                    <a  class="dropdown-item" tabindex="-1" ><i class="fab fa-cuttlefish" aria-hidden="true"></i>
+                    <a  class="dropdown-item" tabindex="-1" ><i class="fas fa-redo"></i>
+                    Retries Left</a>
+                    <ul class="dropdown-menu taskDetail">
+                        <span class="dropdown-item"><%=results[i].retriesLeft%> </span>
+                    </ul>
+                </li>
+                <li class="dropdown-submenu">
+                    <a  class="dropdown-item" tabindex="-1" ><i class="fab fa-cuttlefish"></i>
                     Retries Count</a>
                     <ul class="dropdown-menu taskDetail">
                         <span class="dropdown-item"><%=results[i].retriesCount%> </span>
@@ -100,7 +115,7 @@
     function copy_to_clipboard(text_spn) {
       var copyText = document.getElementById(text_spn);
       var textArea = document.createElement("textarea");
-      textArea.value = copyText.textContent;
+      textArea.value = copyText.textContent.trim();
       document.body.appendChild(textArea);
       textArea.select();
       document.execCommand("Copy");

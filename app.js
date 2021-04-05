@@ -6,6 +6,7 @@ const schedulerRouter = require("./routes/scheduler.js");
 const orchestratorRouter = require('./routes/orchestrator.js');
 const DB = require(__dirname + "/db.js");
 
+
 const app = express();
 
 app.set("view engine", "ejs");
@@ -15,8 +16,6 @@ app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(flash());
-
-
 //create a session
 app.use(
   session({
@@ -36,10 +35,14 @@ app.use(userRouter);
 app.use(schedulerRouter);
 app.use(orchestratorRouter);
 
+
+
 //connect to database
 DB.connection();
 
+
 app.get("/", function (req, res) {
+  console.log('home');
   res.render("home");
 });
 app.listen(3000, function () {

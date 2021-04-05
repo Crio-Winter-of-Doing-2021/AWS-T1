@@ -21,9 +21,10 @@
     <form action="" method="POST" id="retrieveTasks">
 
       <div class="form-group">
-        <label for="taskInstance">Select Task Instance</label>
-        <input type="text" class="form-control" name="taskState" list="states" placeholder="e.g. completed" required>
+        <label for="option">Select Task Instance</label>
+        <input type="text" class="form-control" name="taskInstance" list="states" placeholder="e.g. completed" required>
         <datalist id="states">
+          <option value="All">
           <option value="completed">
           <option value="running">
           <option value="scheduled">
@@ -38,10 +39,12 @@
   </div>
 
   <%if(taskInstance!=""){%>
-    
-
       <%if(results.length==0){%>
-        <h1 style="text-align: center; margin: 40px;">There are no tasks in <%=taskInstance%> state.</h1>
+        <%if(taskInstance!="All"){%>
+          <h1 style="text-align: center; margin: 40px;">There are no tasks in <%=taskInstance%> state.</h1>
+        <%}else{%>
+          <h1 style="text-align: center; margin: 40px;">There are no Tasks scheduled.</h1>
+        <%}%>
       <%}%>
       <div class="tableContainer">
         <%- include('../partials/taskDetails.ejs'); %>
