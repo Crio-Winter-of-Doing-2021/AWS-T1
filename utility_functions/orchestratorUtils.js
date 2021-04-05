@@ -81,26 +81,19 @@ module.exports.executeOrchestration = function(id,conditionCheckRetries,timeDela
             axios.get(conditionCheckURL)
             .then((response)=>
             {
-                DB.updateTaskState(TaskModel,id,'condition-check-task completed');
+                DB.updateTaskState(TaskModel,id,'condition-check-task success');
                 console.log(response.data);
-                if(response.data.conditionSatisfied == 1)
-                {
-                    DB.updateTaskState(TaskModel,id,'second-task running');
+                DB.updateTaskState(TaskModel,id,'second-task running');
                     axios.get(secondTaskURL)
                     .then((response)=>
                     {
-                        DB.updateTaskState(TaskModel,id,'second-task completed');
+                        DB.updateTaskState(TaskModel,id,'second-task success');
                         tasks.delete(id);
                     },
                     (error)=>{
                         DB.updateTaskState(TaskModel,id,'second-task failed');
                         retries(id,conditionCheckRetries,timeDelayForRetries,conditionCheckURL,secondTaskURL,fallbackTaskURL);
                     });
-                }
-                else{
-                    DB.updateTaskState(TaskModel,id,'condition-check-task condition-failure');
-                    retries(id,conditionCheckRetries,timeDelayForRetries,timeDelayForConditionCheck,conditionCheckURL,secondTaskURL,fallbackTaskURL);
-                }
             },
             (error)=>{
                 DB.updateTaskState(TaskModel,id,'condition-check-task failed');

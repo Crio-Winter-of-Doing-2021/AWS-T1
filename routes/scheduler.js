@@ -134,7 +134,6 @@ router.post("/schedule", function (req, res) {
           "please try again"
         );
       } else {
-        
         let id = result._id.toString();
         console.log("successfully updated taskState to scheduled of task with id "+id);
         //store task details in taskDetails map
