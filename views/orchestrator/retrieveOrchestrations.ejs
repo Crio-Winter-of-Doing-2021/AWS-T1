@@ -10,30 +10,37 @@
   <%- include('../partials/libraries.ejs') %>
   <!-- custom css -->
   <link rel="stylesheet" href="/css/styles.css" />
-  <title>Retrieve Tasks</title>
+  <title>Retrieve Orchestrations</title>
 
 </head>
 
 <body>
   <%- include('../partials/navbar.ejs'); %>
   <div class="wrapper">
-    <h1 class="display-3 heading">Retrieve Tasks</h1>
+    <h1 class="display-3 heading">Retrieve Orchestrations</h1>
     <form action="" method="POST" id="retrieveTasks">
 
       <div class="form-group">
         <label for="option">Select Task Instance</label>
         <input type="text" class="form-control" name="taskInstance" list="states" placeholder="e.g. completed" required>
         <datalist id="states">
-          <option value="All">
-          <option value="completed">
-          <option value="running">
-          <option value="scheduled">
-          <option value="cancelled">
-          <option value="failed">
+            <option value="All">
+            <option value="firstTaskRunning">
+            <option value="firstTaskSuccess">
+            <option value="firstTaskFailed">
+            <option value="conditionCheckTaskRunning">
+            <option value="conditionCheckTaskSuccess">
+            <option value="conditionCheckTaskFailed">
+            <option value="secondTaskRunning">
+            <option value="secondTaskSuccess">
+            <option value="secondTaskFailed">
+            <option value="fallbackTaskRunning">
+            <option value="fallbackTaskSuccess">
+            <option value="fallbackTaskFailed">
         </datalist>
       </div>
       <button type="submit" class="btn btn-info button">
-        Retrieve Tasks
+        Retrieve
       </button>
     </form>
   </div>
@@ -41,13 +48,13 @@
   <%if(taskInstance!=""){%>
       <%if(results.length==0){%>
         <%if(taskInstance!="All"){%>
-          <h1 style="text-align: center; margin: 40px;">There are no tasks in <%=taskInstance%> state.</h1>
+          <h1 class="retrieveTaskText">There are no Orchestrations in <%=taskInstance%> state.</h1>
         <%}else{%>
-          <h1 style="text-align: center; margin: 40px;">There are no Tasks scheduled.</h1>
+          <h1 class="retrieveTaskText">There are no Orchestrations scheduled.</h1>
         <%}%>
       <%}%>
       <div class="tableContainer">
-        <%- include('../partials/taskDetails.ejs'); %>
+        <%- include('../partials/orchestrationDetails.ejs'); %>
       </div>
   <%}%>
 </div>

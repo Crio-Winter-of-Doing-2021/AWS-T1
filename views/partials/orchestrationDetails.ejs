@@ -1,0 +1,34 @@
+<!-- map to store buttonType and divColor of for styling various task states -->
+<%let mp=new Map();%>
+<%mp.set('scheduled',{buttonType:'primary',divColor:'#e4fbff'});%>
+<%mp.set('completed',{buttonType:'success',divColor:'#9ecca4'});%>
+<%mp.set('running',{buttonType:'warning',divColor:'#fff9b0'});%>
+<%mp.set('failed',{buttonType:'danger',divColor:'#ff7171'});%>
+<%mp.set('cancelled',{buttonType:'dark',divColor:'#c8c6a7'});%>
+
+<!-- Task Details -->
+<%for(var i=results.length-1;i>=0;i--){%>
+    <%let state = results[i].taskState;%>
+    <%if(state=="secondTaskSuccess"||state=="fallbackTaskSuccess"){%>
+        <%state = "completed";%>
+    <%} else if(state=="scheduled"){ %>
+        <%state = "scheduled";%>
+    <%} else if(state=="firstTaskFailed"||state=="secondTaskFailed"||state=="fallbackTaskFailed"){%>
+        <%state = "failed";%>
+    <%}else{%>
+        <%state="running";%>
+    <%}%>
+    <%let buttonType=mp.get(state).buttonType;%>
+    <%let divColor=mp.get(state).divColor;%>
+    <div  class="taskDetailsWrapper" style="background-color: <%=divColor%>;">
+        <div class="d-flex">
+            <div class="pb-2 flex-fill"><h3 style="color: #930077"><%=results[i].taskName%></h3></div>
+            <div class=" pb-2 flex-fill" style="text-align: end;" ><button class="btn btn-<%=buttonType%> "><%=state%></button></div>
+        </div>
+        <div class="d-flex justify-content-center" style="font-size: medium;font-weight: bold;">
+            <button class="btn btn-info"><a target="_blank" href="/orchestrator/retrieve-tasks/<%=results[i]._id%>" style="color:darkblue;"><i class="fa fa-tasks" aria-hidden="true"></i> Task Details</a></button>
+        </div>
+    </div>
+<%}%>
+<!-- end of task details -->
+

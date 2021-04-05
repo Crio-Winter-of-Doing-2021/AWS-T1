@@ -24,6 +24,16 @@
         <div class="wrapper">
             <h1 class="display-3 heading">Orchestrate Task</h1>
             <form method="POST" id="orchestrateTaskForm">
+                <div class="form-group">
+                    <label for="taskName">Task Name</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="taskName"
+                      placeholder="Enter your task name"
+                      required
+                    />
+                  </div>
                 <div class="form-row">
                     <div class="form-group col-md-6">
                         <label for="firstTaskURL">First Task URL</label>
@@ -66,7 +76,7 @@
                     </div>
                 </div>
                 <!-- submit button -->
-                <button type="submit" class="btn btn-success button">Schedule Orchestration</button>
+                <button type="submit" class="btn btn-success button">Schedule</button>
                 <!-- end submit button -->
             </form>
         </div>

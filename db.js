@@ -49,12 +49,17 @@ module.exports.createUsersCollection = function () {
 
 module.exports.createOrchestratorCollection = function(){
   const orchestratorCollection = mongoose.Schema({
+    username:String,
+    taskName:String,
     firstTaskURL: String,
     secondTaskURL: String,
     conditionCheckURL:String,
     fallbackTaskURL:String,
     taskState:String,
-    conditionCheckRetries:Number
+    conditionCheckRetries:Number,
+    initialDelay:Number,
+    timeDelayBetweenRetries:Number,
+    timeDelayForConditionCheck:Number
   });
   return mongoose.model("orchestratorTask", orchestratorCollection);
 };

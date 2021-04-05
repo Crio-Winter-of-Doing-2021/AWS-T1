@@ -108,7 +108,6 @@ function lambdaErrorHandler(error,id, url, params,retriesCount,timeDelayBetweenR
     },timeDelayBetweenRetries);
   }
   else{
-    const TaskModel = scheduler.TaskModel;
     DB.updateTaskState(TaskModel, id, "failed");
   }
 }
@@ -118,12 +117,12 @@ module.exports.executeAWSLambda = function (id, url, params,retriesCount,timeDel
   
   const TaskModel = scheduler.TaskModel;
   let tasks = scheduler.tasks;
+  if(tasks.has(id)){
+    tasks.delete(id);
+    console.log("Deleted task with id "+id+" from tasks map");
+  }
   //update in database taskState to running
   DB.updateTaskState(TaskModel, id, "running");
-  //delete task from tasks map as lambda has triggered already and task cannot be 
-  //deleted or modified after lambda has been triggered
-  tasks.delete(id);
-  console.log('Deleted task with id '+id +' from tasks map');
   axios.get(url, {
     params:params
   }).then(
