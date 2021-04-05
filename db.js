@@ -31,7 +31,8 @@ module.exports.createSchedulerCollection = function () {
     retriesLeft:Number,
     timeDelayBetweenRetries: Number,
     parameters:String,
-    taskState: String
+    taskState: String,
+    serverResponse:String
   });
   return mongoose.model("task", schedulerCollection);
 };
@@ -69,14 +70,14 @@ module.exports.updateTaskState = function (TaskModel, id, taskState) {
         );
       } else {
         console.log(
-          "successfully updated taskState to " + taskState + " of taskId " + id
+          "Updated taskState to " + taskState + " of taskId " + id
         );
       }
     }
   );
 };
 
-module.exports.updateRetries = function (TaskModel, id, retriesLeft) {
+module.exports.updateRetriesLeft = function (TaskModel, id, retriesLeft) {
   TaskModel.findByIdAndUpdate(
     id,
     { retriesLeft:retriesLeft},
@@ -91,6 +92,23 @@ module.exports.updateRetries = function (TaskModel, id, retriesLeft) {
     }
   );
 };
+
+module.exports.updateServerResponse = function (TaskModel, id, msg) {
+  TaskModel.findByIdAndUpdate(
+    id,
+    { serverResponse:msg},
+    function (err, result) {
+      if (err) {
+        console.log(
+          "could not update server response of task with " + id
+        );
+      } else {
+        console.log('Updated server response for task with id '+id+' to '+msg);
+      }
+    }
+  );
+};
+
 
 
 module.exports.modifyTaskScheduledTime = function (TaskModel, id, scheduledTime) {

@@ -93,14 +93,14 @@
                                     <a class="dropdown-item"><%=params[j]%></a>
                                 <%}%>
                                 <!-- </div> -->
-                            </ul>
-                        
-                        
+                            </ul>  
                     </li>
                 <%}%>
                 <!-- end of parameters menu item -->  
             </ul>
-      <!-- </div> -->
+            <%if(user.username==results[i].username){%>
+                <a href="/scheduler/retrieve-tasks/<%=results[i]._id%>" target="_blank" style="position:absolute; display: inline-block;right:0;bottom: 0;">Response</a>
+            <%}%>
     </div>    
     </div> 
 <%}%>

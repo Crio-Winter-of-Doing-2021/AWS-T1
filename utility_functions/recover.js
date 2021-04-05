@@ -25,7 +25,7 @@ module.exports.recoverTasks = function () {
                 //update taskState to failed
                 DB.updateTaskState(TaskModel,results[i]._id,'failed');
                 //update retries left to 0 in database
-                DB.updateRetries(TaskModel,results[i]._id,0);
+                DB.updateRetriesLeft(TaskModel,results[i]._id,0);
               }
               else if(taskState=='scheduled')
               {

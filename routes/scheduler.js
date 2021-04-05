@@ -22,40 +22,53 @@ module.exports.taskDetails = taskDetails;
 schedulerRecovery.recoverTasks();
 /**************************** Scheduler Routes *******************************/
 
-router.get("/schedule", function (req, res) {
-  if (req.isAuthenticated()) {
-    //console.log(req.user);
-    res.render("scheduler/scheduleTask");
-  } else {
-    res.redirect("/login");
+//middleware for authenticating scheduler routes
+router.use((req,res,next)=>{
+  if(!req.isAuthenticated())
+  {
+    res.redirect("/auth/login");
   }
+  else{
+    next();
+  }
+})
+
+router.get("/schedule", function (req, res) {
+    res.render("scheduler/scheduleTask");
 });
 
 router.get("/retrieve-tasks", function (req, res) {
-  if (req.isAuthenticated()) {
     res.render("scheduler/retrieveTasks", {
       taskInstance: "",
       results: [],
     });
-  } else {
-    res.redirect("/login");
-  }
 });
 
 router.get("/cancel", function (req, res) {
-  if (req.isAuthenticated()) {
     res.render("scheduler/cancelTask");
-  } else {
-    res.redirect("/login");
-  }
 });
 
 router.get("/modify",function(req,res){
-  if (req.isAuthenticated()) {
     res.render("scheduler/modifyTask");
-  } else {
-    res.redirect("/login");
-  }
+});
+
+router.get("/retrieve-tasks/:id", function (req, res) {
+  let taskId=req.params.id;
+  TaskModel.findById(taskId, function (err, result) {
+    if (err){
+      res.json(err);
+    } 
+    else if(req.user.username!=result.username){
+      res.json({msg:'Not authorised'});
+    }
+    else if(result.serverResponse==undefined)
+    {
+      res.json({msg:'No Response from Server'});
+    }
+    else if(result.serverResponse!=undefined){
+      res.json(JSON.parse(result.serverResponse));
+    }
+  });
 });
 
 /*
@@ -72,7 +85,6 @@ router.get("/modify",function(req,res){
 */
 
 router.post("/schedule", function (req, res) {
-  if (req.isAuthenticated()) {
     const taskName = req.body.taskName;
     const url = req.body.URL;
     const scheduledDate = req.body.datefield;
@@ -146,11 +158,8 @@ router.post("/schedule", function (req, res) {
           "please note your taskId for future reference: " + id
         );
       }
-      res.redirect("/schedule");
+      res.redirect("/scheduler/schedule");
     });
-  } else {
-    res.redirect("/login");
-  }
 });
 
 /* 
@@ -161,14 +170,13 @@ router.post("/schedule", function (req, res) {
                                               'current logged in user'
 */
 router.post("/retrieve-tasks", function (req, res) {
-  if (req.isAuthenticated()) {
     let taskInstance = req.body.taskInstance;
     if(taskInstance=="All")
     {
       TaskModel.find({}, function (err, results) {
         if (err) {
           console.log(err);
-          res.redirect("/retrieve-tasks");
+          res.redirect("/scheduler/retrieve-tasks");
         } else {
           res.render("scheduler/retrieveTasks", {
             taskInstance: taskInstance,
@@ -183,7 +191,7 @@ router.post("/retrieve-tasks", function (req, res) {
         function (err, results) {
           if (err) {
             console.log(err);
-            res.redirect("/retrieve-tasks");
+            res.redirect("/scheduler/retrieve-tasks");
           } else {
             res.render("scheduler/retrieveTasks", {
               taskInstance: taskInstance,
@@ -193,9 +201,6 @@ router.post("/retrieve-tasks", function (req, res) {
         }
       );
     }
-  } else {
-    res.redirect("/login");
-  }
 });
 
 /* 
@@ -205,7 +210,7 @@ router.post("/retrieve-tasks", function (req, res) {
   a) cancels the task if user is authorised to cancel the task and task has not been triggered already
 */
 router.post("/cancel", function (req, res) {
-  if (req.isAuthenticated()) {
+  
     let taskId = req.body.taskId;
     //remove extra spaces from taskId
     taskId = taskId.trim();
@@ -257,11 +262,9 @@ router.post("/cancel", function (req, res) {
           );
         }
       }
-      res.redirect("/cancel");
+      res.redirect("/scheduler/cancel");
     });
-  } else {
-    res.redirect("/login");
-  }
+ 
 });
 
 /*
@@ -272,7 +275,6 @@ router.post("/cancel", function (req, res) {
   a) modifies task if user is authorised to modify the task and task has not been executed already
 */
 router.post("/modify",function(req,res){
-  if (req.isAuthenticated()) {
     let taskId = req.body.taskId;
     //remove extra spaces from taskId
     taskId = taskId.trim();
@@ -354,11 +356,8 @@ router.post("/modify",function(req,res){
           );
         }
       }
-      res.redirect("/modify");
+      res.redirect("/scheduler/modify");
     });
-  } else {
-    res.redirect("/login");
-  }
 
 });
 

@@ -7,21 +7,9 @@ const DB = require("../db.js");
 const router = express.Router();
 
 const userModel = DB.createUsersCollection();
-//authentication middleware
-router.use(passport.initialize());
-router.use(passport.session());
-
 passport.use(userModel.createStrategy());
-
 passport.serializeUser(userModel.serializeUser());
 passport.deserializeUser(userModel.deserializeUser());
-
-//middle-ware for checking if user is logged in
-router.use(function (req, res, next) {
-  res.locals.login = req.isAuthenticated();
-  res.locals.user = req.user;
-  next();
-});
 
 /* Authenication routes */
 router.get("/login", function (req, res) {
@@ -37,16 +25,21 @@ router.get("/forgot", function (req, res) {
 });
 
 router.get("/reset", function (req, res) {
-  if (req.isAuthenticated()) {
+  if(req.isAuthenticated())
     res.render("userAuth/reset", { resetMessage: null, type: null });
-  } else {
-    res.redirect("/login");
+  else{
+    res.redirect("/auth/login");
   }
 });
 
 router.get("/logout", function (req, res) {
-  req.logout();
-  res.redirect("/");
+  if(req.isAuthenticated()){
+    req.logout();
+    res.redirect("/");
+  }
+  else{
+    res.redirect("/auth/login");
+  }
 });
 
 router.post("/register", function (req, res) {
@@ -76,41 +69,48 @@ router.post("/register", function (req, res) {
 router.post(
   "/login",
   passport.authenticate("local", {
-    successRedirect: "/schedule",
-    failureRedirect: "/login",
+    successRedirect: "/scheduler/schedule",
+    failureRedirect: "/auth/login",
     failureFlash: true,
   })
 );
 
 router.post("/reset", function (req, res) {
-  userModel.find({ username: req.user.username }, function (err, result) {
-    if (err) {
-      res.render("userAuth/reset", {
-        resetMessage: "error! Please try again!!",
-        type: "danger",
-      });
-    } else {
-      var user = result[0];
-      user.changePassword(
-        req.body.oldPassword,
-        req.body.newPassword,
-        function (err, result) {
-          if (err) {
-            console.log(err);
-            res.render("userAuth/reset", {
-              resetMessage: "error! Please try again!!",
-              type: "danger",
-            });
-          } else {
-            res.render("userAuth/reset", {
-              resetMessage: "password updated successfully!",
-              type: "success",
-            });
+  if(req.isAuthenticated())
+  {
+    userModel.find({ username: req.user.username }, function (err, result) {
+      if (err) {
+        res.render("userAuth/reset", {
+          resetMessage: "error! Please try again!!",
+          type: "danger",
+        });
+      } else {
+        var user = result[0];
+        user.changePassword(
+          req.body.oldPassword,
+          req.body.newPassword,
+          function (err, result) {
+            if (err) {
+              console.log(err);
+              res.render("userAuth/reset", {
+                resetMessage: "error! Please try again!!",
+                type: "danger",
+              });
+            } else {
+              res.render("userAuth/reset", {
+                resetMessage: "password updated successfully!",
+                type: "success",
+              });
+            }
           }
-        }
-      );
-    }
-  });
+        );
+      }
+    });
+  }
+  else{
+    res.redirect("/auth/login");
+  }
+  
 });
 
 router.post("/forgot", function (req, res) {
@@ -130,7 +130,7 @@ router.post("/forgot", function (req, res) {
         intro: "",
         message: "Email address is not registered!",
       };
-      res.redirect("/forgot");
+      res.redirect("/auth/forgot");
     } else {
       //var user = result[0];
       //console.log(user);
@@ -146,7 +146,7 @@ router.post("/forgot", function (req, res) {
             intro: "Error",
             message: "error in setting password. Please try again",
           };
-          res.redirect("/forgot");
+          res.redirect("/auth/forgot");
         } else {
           user.save();
           //
@@ -172,9 +172,8 @@ router.post("/forgot", function (req, res) {
                 message: "your new password is sent to your registered email",
               };
             }
-            res.redirect("/forgot");
+            res.redirect("/auth/forgot");
           });
-          //res.redirect("/forgot");
         }
       });
     }

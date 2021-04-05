@@ -1,6 +1,7 @@
 const axios = require("axios");
 const scheduler = require("../routes/scheduler");
 const DB = require("../db.js");
+const { response } = require("express");
 
 /*********************** helper functions ************************/
 
@@ -58,26 +59,47 @@ function retry(id, url, params,retriesCount,timeDelayBetweenRetries)
       //successful response from server
       //update retries left in database
       retriesCount-=1;
-      DB.updateRetries(TaskModel,id,retriesCount);
+      console.log("Remaining retries "+retriesCount);
+      DB.updateRetriesLeft(TaskModel,id,retriesCount);
+      console.log("Executed lambda on retries");
+      //update serverResponse in DB
+      let msg = {status:response.status,data:response.data};
+      msg=JSON.stringify(msg);
+      DB.updateServerResponse(TaskModel,id,msg);
       //update in database taskState to completed
       DB.updateTaskState(TaskModel, id, "completed");
-      console.log("Remaining retries "+retriesCount);
-      console.log("Response after execution");
-      console.log(response.data);
     },
     (error) => {
       //All status codes in 400/500 are handled here
       retriesCount-=1;
       //update retries left in database
-      DB.updateRetries(TaskModel,id,retriesCount);
-      lambdaErrorHandler(id, url, params,retriesCount,timeDelayBetweenRetries);
+      DB.updateRetriesLeft(TaskModel,id,retriesCount);
+      lambdaErrorHandler(error,id, url, params,retriesCount,timeDelayBetweenRetries);
     })
   }
-  
-} 
 
-function lambdaErrorHandler(id, url, params,retriesCount,timeDelayBetweenRetries)
+function lambdaErrorHandler(error,id, url, params,retriesCount,timeDelayBetweenRetries)
 {
+  const TaskModel = scheduler.TaskModel;
+  //update server response in DB based on error
+  if (error.response) {
+    // The request was made and the server responded with a status code
+    // that falls out of the range of 2xx
+    let msg = {status:error.response.status,data:error.response.data};
+    msg=JSON.stringify(msg);
+    DB.updateServerResponse(TaskModel,id,msg);
+  } else if (error.request) {
+    // The request was made but no response was received
+    // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+    // http.ClientRequest in node.js
+    DB.updateServerResponse(TaskModel,id,"The request was made to lambda but no response was received");
+  } else {
+    // Something happened in setting up the request that triggered an Error
+    let msg = JSON.stringify(error.message);
+    msg=JSON.stringify(msg);
+    DB.updateServerResponse(TaskModel,id,msg);
+  }
+  //check retries
   if(retriesCount>0)
   {
     setTimeout(function(){
@@ -108,13 +130,15 @@ module.exports.executeAWSLambda = function (id, url, params,retriesCount,timeDel
     (response) => {
         //update in database taskState to completed
         DB.updateTaskState(TaskModel, id, "completed");
-        console.log("successfully executed lambda without retries");
-        console.log("Response after execution");
-        console.log(response.data);
+        console.log("Executed lambda without retries");
+        console.log("status code "+response.status);
+        console.log("response data "+response.data);
+        let msg = {status:response.status,data:response.data};
+        msg=JSON.stringify(msg);
+        DB.updateServerResponse(TaskModel,id,msg);
     },
     (error) => {
-      // console.log(error.data);
-      lambdaErrorHandler(id, url, params,retriesCount,timeDelayBetweenRetries);
+      lambdaErrorHandler(error,id, url, params,retriesCount,timeDelayBetweenRetries);
     }
   );
 };

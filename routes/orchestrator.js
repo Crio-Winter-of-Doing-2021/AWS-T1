@@ -3,6 +3,8 @@ const utils = require("../utility_functions/orchestratorUtils.js");
 const DB = require("../db.js");
 const axios = require("axios");
 
+const router = express.Router();
+
 //create or return a pre-created orchestrator collection
 const TaskModel = DB.createOrchestratorCollection();
 
@@ -13,20 +15,24 @@ let tasks = new Map();
 module.exports.TaskModel = TaskModel;
 module.exports.tasks = tasks;
 
-const router = express.Router();
-router.get("/orchestrate",function(req,res){
-    if(req.isAuthenticated())
+
+
+//middleware for authenticating orchestration routes
+router.use((req,res,next)=>{
+    if(!req.isAuthenticated())
     {
-        res.render("orchestrator/scheduleOrchestration");
+      res.redirect("/auth/login");
     }
     else{
-        res.redirect("/login");
+      next();
     }
 });
 
+router.get("/orchestrate",function(req,res){
+        res.render("orchestrator/scheduleOrchestration");
+});
+
 router.post("/orchestrate",function(req,res){
-    if(req.isAuthenticated())
-    {
         let firstTaskURL = req.body.firstTaskURL;
         let initialDelay = req.body.initialDelay;
         let secondTaskURL = req.body.secondTaskURL;
@@ -55,25 +61,21 @@ router.post("/orchestrate",function(req,res){
         //save the task in database
         taskInfo.save(function (err, result) {
             if (err) {
-            console.log(err);
+                console.log(err);
+                utils.setFlashMessage(req,'danger','','Error occured! Please try again');
             } 
             else 
             {
                 let id = result._id.toString();
-                console.log("orchestration successfully scheduled");
+                utils.setFlashMessage(req,'success','success','orchestration successfully scheduled!');
                 var task = setTimeout(function () {
                     utils.executeOrchestration(id,conditionCheckRetries,timeDelayForRetries,timeDelayForConditionCheck,conditionCheckURL,firstTaskURL,secondTaskURL,fallbackTaskURL)
                 },initialDelay);
                 tasks.set(id,task);
             }
-        });
-        utils.setFlashMessage(req,'success','success','orchestration successfully scheduled!');
-        res.redirect("/orchestrate");
-    }
-    else{
-        res.redirect("/login");
-    }
-});
+            res.redirect("/orchestration/orchestrate");
+        }); 
+    });
 
 
 
