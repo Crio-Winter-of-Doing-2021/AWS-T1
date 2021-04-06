@@ -3,20 +3,17 @@ const utils = require("./schedulerUtils.js");
 const DB = require("../db.js");
 
 
-module.exports.recoverTasks = function () {
+module.exports.recoverSchedulerTasks = function () {
     let tasks = scheduler.tasks;
     let taskDetails = scheduler.taskDetails;
     const TaskModel = scheduler.TaskModel;
     //Retrieve all the tasks which are in scheduled or running tasks irrespective of user
     TaskModel.find({taskState:{$in: ['scheduled', 'running']}}, function (err, results) {
-        console.log("**** Task Recovery *****");
+        console.log("**** Scheduler Recovery *****");
         if (err) {
           console.log('could not recover tasks');
         } else 
         {
-          if(results.length==0){
-            console.log('There are no tasks to be recovered!');
-          }
           for(var i=0;i<results.length;i++)
           {
               var taskState=results[i].taskState;
@@ -57,5 +54,8 @@ module.exports.recoverTasks = function () {
               }
           }
         }
-      });
-  };
+    });
+};
+
+
+

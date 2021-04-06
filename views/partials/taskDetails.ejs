@@ -44,12 +44,14 @@
                         </ul>
                     </li>
                 <%}%>
-                <li class="dropdown-submenu">
-                    <a  class="dropdown-item" tabindex="-1"><i class="fas fa-globe" aria-hidden="true"></i> Lambda URL</a>
-                    <ul class="dropdown-menu taskDetail" >
-                        <span  id="taskURLSpan<%=i%>" class="dropdown-item" ><a href="#" onclick="copy_to_clipboard('taskURLSpan<%=i%>');"><i class="fas fa-copy"></i></a> <%=results[i].lambdaURL%> </span>
-                    </ul>
-                </li>
+                <%if(results[i].username==user.username){%>
+                    <li class="dropdown-submenu">
+                        <a  class="dropdown-item" tabindex="-1"><i class="fas fa-globe" aria-hidden="true"></i> Lambda URL</a>
+                        <ul class="dropdown-menu taskDetail" >
+                            <span  id="taskURLSpan<%=i%>" class="dropdown-item" ><a href="#" onclick="copy_to_clipboard('taskURLSpan<%=i%>');"><i class="fas fa-copy"></i></a> <%=results[i].lambdaURL%> </span>
+                        </ul>
+                    </li>
+                <%}%>
                 <li class="dropdown-submenu">
                     <a  class="dropdown-item" tabindex="-1" ><i class="fa fa-calendar-alt" aria-hidden="true"></i>
                     Scheduled Time</a>
@@ -57,13 +59,15 @@
                         <span class="dropdown-item"><%=results[i].scheduledTime%> </span>
                     </ul>
                 </li>
-                <li class="dropdown-submenu">
-                    <a  class="dropdown-item" tabindex="-1" ><i class="fas fa-redo"></i>
-                    Retries Left</a>
-                    <ul class="dropdown-menu taskDetail">
-                        <span class="dropdown-item"><%=results[i].retriesLeft%> </span>
-                    </ul>
-                </li>
+                <%if(results[i].username==user.username){%>
+                    <li class="dropdown-submenu">
+                        <a  class="dropdown-item" tabindex="-1" ><i class="fas fa-redo"></i>
+                        Retries Left</a>
+                        <ul class="dropdown-menu taskDetail">
+                            <span class="dropdown-item"><%=results[i].retriesLeft%> </span>
+                        </ul>
+                    </li>
+                <%}%>
                 <li class="dropdown-submenu">
                     <a  class="dropdown-item" tabindex="-1" ><i class="fab fa-cuttlefish"></i>
                     Retries Count</a>
@@ -80,7 +84,7 @@
                 </li>
                 <%var params=results[i].parameters;%>
                 <!-- parameters menu item -->
-                <%if(params.length>2){%>
+                <%if(params.length>2&&results[i].username==user.username){%>
                     <%params=params.substring(1,params.length-1);%>
                     <%params=params.split(",");%>
                     <li class="dropdown-submenu">

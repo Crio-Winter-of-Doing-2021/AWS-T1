@@ -51,6 +51,7 @@ module.exports.createOrchestratorCollection = function(){
   const orchestratorCollection = mongoose.Schema({
     username:String,
     taskName:String,
+    scheduledTime:String,
     firstTaskURL: String,
     secondTaskURL: String,
     conditionCheckURL:String,

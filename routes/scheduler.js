@@ -1,6 +1,6 @@
 const express = require("express");
 const utils = require("../utility_functions/schedulerUtils.js");
-const schedulerRecovery = require("../utility_functions/recover");
+const recovery = require("../utility_functions/recoverSchedulerTasks");
 const DB = require("../db.js");
 
 const router = express.Router();
@@ -19,7 +19,7 @@ module.exports.tasks = tasks;
 module.exports.taskDetails = taskDetails;
 
 //Recover scheduled tasks in case of server crash
-schedulerRecovery.recoverTasks();
+recovery.recoverSchedulerTasks();
 /**************************** Scheduler Routes *******************************/
 
 //middleware for authenticating scheduler routes

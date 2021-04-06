@@ -1,8 +1,8 @@
-const express = require("express");
+const express = require("express"); 
+const moment = require("moment");
 const utils = require("../utility_functions/orchestratorUtils.js");
 const DB = require("../db.js");
-const axios = require("axios");
-
+const recovery = require("../utility_functions/recoverOrchestrations.js");
 const router = express.Router();
 
 //create or return a pre-created orchestrator collection
@@ -11,11 +11,12 @@ const TaskModel = DB.createOrchestratorCollection();
 //tasks maps taskId with its setTimeout() function call
 let tasks = new Map();
 
-//export TaskModel and tasks for use in other files(utils.js)
+//export TaskModel and tasks for use in other files(utils.js/recover.js)
 module.exports.TaskModel = TaskModel;
 module.exports.tasks = tasks;
 
-
+//Recover orchestrations in case of server crash
+recovery.recoverOrchestratorTasks();
 
 //middleware for authenticating orchestration routes
 router.use((req,res,next)=>{
@@ -41,6 +42,7 @@ router.get("/retrieve-tasks",function(req,res){
 
 router.post("/orchestrate",function(req,res){
     let taskName=req.body.taskName;
+    let scheduledTime =  moment().format('LLLL');
     let firstTaskURL = req.body.firstTaskURL;
     let initialDelay = req.body.initialDelay;
     let secondTaskURL = req.body.secondTaskURL;
@@ -50,6 +52,7 @@ router.post("/orchestrate",function(req,res){
     let conditionCheckRetries = req.body.conditionCheckRetries;
     let timeDelayForRetries = req.body.timeDelayForRetries;
     console.log("taskName: "+taskName);
+    console.log("scheduledTime "+scheduledTime);
     console.log("firstTaskURL: "+firstTaskURL);
     console.log("initialDelay: "+initialDelay);
     console.log("secondTaskURL: "+secondTaskURL);
@@ -62,6 +65,7 @@ router.post("/orchestrate",function(req,res){
     const taskInfo = new TaskModel({
         username:req.user.username,
         taskName:taskName,
+        scheduledTime:scheduledTime,
         firstTaskURL: firstTaskURL,
         secondTaskURL: secondTaskURL,
         conditionCheckURL: conditionCheckURL,
@@ -94,7 +98,6 @@ router.post("/orchestrate",function(req,res){
 
 router.post("/retrieve-tasks", function (req, res) {
     let taskInstance = req.body.taskInstance;
-    console.log(taskInstance);
     if(taskInstance=="All")
     {
       TaskModel.find({}, function (err, results) {
@@ -138,10 +141,14 @@ router.get("/retrieve-tasks/:id", function (req, res) {
           taskDetails['taskName']=result.taskName;
           taskDetails['scheduledBy']=result.username;
           taskDetails['taskState']=result.taskState;
-          taskDetails['firstTaskURL']=result.firstTaskURL;
-          taskDetails['secondTaskURL']=result.secondTaskURL;
-          taskDetails['conditionCheckURL']=result.conditionCheckURL;
-          taskDetails['fallbackTaskURL']=result.fallbackTaskURL;
+          taskDetails['scheduledTime']=result.scheduledTime;
+          if(result.username==req.user.username)
+          {
+            taskDetails['firstTaskURL']=result.firstTaskURL;
+            taskDetails['secondTaskURL']=result.secondTaskURL;
+            taskDetails['conditionCheckURL']=result.conditionCheckURL;
+            taskDetails['fallbackTaskURL']=result.fallbackTaskURL;
+          }
           taskDetails['conditionCheckRetries']=result.conditionCheckRetries;
           taskDetails['initialDelay']=result.initialDelay;
           taskDetails['timeDelayBetweenRetries']=result.timeDelayBetweenRetries;
