@@ -15,7 +15,7 @@ module.exports.recoverOrchestratorTasks = function () {
         else 
         {
             const st = new Set(["secondTaskSuccess","fallbackTaskSuccess","fallbackTaskFailed",
-            "secondTaskFailed"]);
+            "secondTaskFailed","cancelled"]);
             
           for(var i=0;i<results.length;i++)
           {
@@ -56,7 +56,6 @@ module.exports.recoverOrchestratorTasks = function () {
                 tasks.set(id, task);
               }
               else if(!st.has(taskState)){
-                console.log(taskState);
                 let state = taskState.substring(0,taskState.indexOf("k")+1)+"Failed";
                 DB.updateTaskState(TaskModel,id,state);
               }

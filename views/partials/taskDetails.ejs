@@ -8,8 +8,9 @@
 
 <!-- Task Details -->
 <%for(var i=results.length-1;i>=0;i--){%>
-    <%let buttonType=mp.get(results[i].taskState).buttonType;%>
-    <%let divColor=mp.get(results[i].taskState).divColor;%>
+    <%let taskState=results[i].taskState;%>
+    <%let buttonType=mp.get(taskState).buttonType;%>
+    <%let divColor=mp.get(taskState).divColor;%>
     <div  class="taskDetailsWrapper" style="background-color: <%=divColor%>;">
       <!-- scheduling time and task-state -->
         <div class="d-flex">
@@ -102,7 +103,7 @@
                 <%}%>
                 <!-- end of parameters menu item -->  
             </ul>
-            <%if(user.username==results[i].username){%>
+            <%if(user.username==results[i].username&&(taskState=="failed"||taskState=="completed")){%>
                 <a href="/scheduler/retrieve-tasks/<%=results[i]._id%>" target="_blank" style="position:absolute; display: inline-block;right:0;bottom: 0;font-weight:600;">Response</a>
             <%}%>
     </div>    

@@ -30,14 +30,18 @@ router.use((req,res,next)=>{
 });
 
 router.get("/orchestrate",function(req,res){
-    res.render("orchestrator/scheduleOrchestration");
+    res.render("orchestrator/schedule");
 });
 
 router.get("/retrieve-tasks",function(req,res){
-    res.render("orchestrator/retrieveOrchestrations",{
+    res.render("orchestrator/retrieve",{
         taskInstance: "",
         results: [],
       });
+});
+
+router.get("/cancel", function (req, res) {
+  res.render("orchestrator/cancel");
 });
 
 router.post("/orchestrate",function(req,res){
@@ -86,7 +90,7 @@ router.post("/orchestrate",function(req,res){
         else 
         {
             let id = result._id.toString();
-            utils.setFlashMessage(req,'success','success','orchestration successfully scheduled!');
+            utils.setFlashMessage(req,'success','orchestration successfully scheduled!',('TaskId '+id));
             var task = setTimeout(function () {
                 utils.executeOrchestration(id,conditionCheckRetries,timeDelayForRetries,timeDelayForConditionCheck,conditionCheckURL,firstTaskURL,secondTaskURL,fallbackTaskURL)
             },initialDelay);
@@ -105,7 +109,7 @@ router.post("/retrieve-tasks", function (req, res) {
           console.log(err);
           res.redirect("/orchestrator/retrieve-tasks");
         } else {
-          res.render("orchestrator/retrieveOrchestrations", {
+          res.render("orchestrator/retrieve", {
             taskInstance: taskInstance,
             results: results,
           });
@@ -120,7 +124,7 @@ router.post("/retrieve-tasks", function (req, res) {
             console.log(err);
             res.redirect("/orchestrator/retrieve-tasks");
           } else {
-            res.render("orchestrator/retrieveOrchestrations", {
+            res.render("orchestrator/retrieve", {
               taskInstance: taskInstance,
               results: results,
             });
@@ -139,6 +143,7 @@ router.get("/retrieve-tasks/:id", function (req, res) {
       else{
           var taskDetails={};
           taskDetails['taskName']=result.taskName;
+          taskDetails['taskId']=result._id;
           taskDetails['scheduledBy']=result.username;
           taskDetails['taskState']=result.taskState;
           taskDetails['scheduledTime']=result.scheduledTime;
@@ -157,5 +162,61 @@ router.get("/retrieve-tasks/:id", function (req, res) {
       } 
     });
   });
+
+  router.post("/cancel", function (req, res) {
+    let taskId = req.body.taskId;
+    //remove extra spaces from taskId
+    taskId = taskId.trim();
+    TaskModel.findById(taskId, function (err, result) {
+      if (err) {
+        utils.setFlashMessage(
+          req,
+          "danger",
+          "Error",
+          "Invalid Task Id! please try again"
+        );
+      } else if (result == null) {
+        utils.setFlashMessage(
+          req,
+          "danger",
+          "Task not found",
+          "Task with id " + taskId + " does not exists"
+        );
+      } else {
+        //If task is created by current user
+        if (result.username === req.user.username) {
+          //if task is present in tasks map
+          if (tasks.has(taskId)) {
+            clearTimeout(tasks.get(taskId));
+            tasks.delete(taskId);
+            //update taskState to cancelled in DB
+            DB.updateTaskState(TaskModel, taskId, "cancelled");
+            utils.setFlashMessage(
+              req,
+              "success",
+              "",
+              "Task with id " + taskId + " successfully deleted!"
+            );
+          } else {
+            utils.setFlashMessage(
+              req,
+              "danger",
+              "Orchestration already triggered",
+              "Task with id " + taskId + " cannot be Deleted."
+            );
+          }
+        } else {
+          utils.setFlashMessage(
+            req,
+            "danger",
+            "Unauthorised",
+            "Task with id " + taskId+" is not scheduled by you."
+          );
+        }
+      }
+      res.redirect("/orchestrator/cancel");
+    });
+ 
+});
   
 module.exports = router;

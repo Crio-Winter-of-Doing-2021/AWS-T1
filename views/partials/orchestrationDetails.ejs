@@ -15,7 +15,7 @@
         <%state = "scheduled";%>
     <%} else if(state=="firstTaskFailed"||state=="secondTaskFailed"||state=="fallbackTaskFailed"){%>
         <%state = "failed";%>
-    <%}else{%>
+    <%}else if(state!="cancelled"){%>
         <%state="running";%>
     <%}%>
     <%let buttonType=mp.get(state).buttonType;%>
