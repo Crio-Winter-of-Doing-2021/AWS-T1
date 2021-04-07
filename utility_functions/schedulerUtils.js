@@ -15,7 +15,7 @@ module.exports.getParams = function (req) {
   let checkbox = req.body.checkbox0;
   while (typeof checkbox != "undefined") {
     let temp = "";
-    if (checkbox == "on") {
+    if (checkbox != "off") {
       temp = "key" + ind;
       const key = req.body[temp];
       temp = "value" + ind;
@@ -130,8 +130,6 @@ module.exports.executeAWSLambda = function (id, url, params,retriesCount,timeDel
         //update in database taskState to completed
         DB.updateTaskState(TaskModel, id, "completed");
         console.log("Executed lambda without retries");
-        console.log("status code "+response.status);
-        console.log("response data "+response.data);
         let msg = {status:response.status,data:response.data};
         msg=JSON.stringify(msg);
         DB.updateServerResponse(TaskModel,id,msg);

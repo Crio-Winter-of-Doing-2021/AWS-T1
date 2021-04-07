@@ -5,9 +5,6 @@ $(document).ready(function () {
     $("#addParams").click(function () {
       var paramsList = document.getElementById("paramsList");
       var len = paramsList.getElementsByTagName("li").length;
-      //len+=1;
-      console.log(len);
-      //len=2;
       var li = document.createElement("li");
       li.id = "params" + len;
       li.innerHTML =
@@ -20,7 +17,7 @@ $(document).ready(function () {
         "name='" +
         "value" +
         len +
-        "' placeholder='value'></div><input class='form-check-input' type='checkbox' name='checkbox" +
+        "' placeholder='value'></div><input type='hidden' value='off' name='checkbox"+len+"'><input class='form-check-input' type='checkbox' name='checkbox" +
         len +
         "' checked>";
       //console.log('hi');
