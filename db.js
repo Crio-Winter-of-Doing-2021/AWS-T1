@@ -60,7 +60,8 @@ module.exports.createOrchestratorCollection = function(){
     conditionCheckRetries:Number,
     initialDelay:Number,
     timeDelayBetweenRetries:Number,
-    timeDelayForConditionCheck:Number
+    timeDelayForConditionCheck:Number,
+    serverResponse:String
   });
   return mongoose.model("orchestratorTask", orchestratorCollection);
 };

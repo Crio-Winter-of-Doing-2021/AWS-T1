@@ -156,8 +156,11 @@ router.get("/retrieve-tasks/:id", function (req, res) {
           }
           taskDetails['conditionCheckRetries']=result.conditionCheckRetries;
           taskDetails['initialDelay']=result.initialDelay;
-          taskDetails['timeDelayBetweenRetries']=result.timeDelayBetweenRetries;
+          taskDetails['timeDelayForRetries']=result.timeDelayForRetries;
           taskDetails['timeDelayForConditionCheck']=result.timeDelayForConditionCheck;
+          if(result.username==req.user.username&&result.serverResponse!=undefined){
+            taskDetails['serverResponse']=JSON.parse(result.serverResponse);
+          }
           res.json(taskDetails);
       } 
     });

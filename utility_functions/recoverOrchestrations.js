@@ -8,14 +8,13 @@ module.exports.recoverOrchestratorTasks = function () {
     const TaskModel = orchestrator.TaskModel;
     //Retrieve all orchestrations irrespective of user
     TaskModel.find({}, function (err, results) {
-        console.log("**** Orchestrator Recovery *****");
         if (err) {
           console.log('could not recover tasks');
         } 
         else 
         {
             const st = new Set(["secondTaskSuccess","fallbackTaskSuccess","fallbackTaskFailed",
-            "secondTaskFailed","cancelled"]);
+            "secondTaskFailed","cancelled","firstTaskFailed","firstTaskSuccess"]);
             
           for(var i=0;i<results.length;i++)
           {
@@ -56,7 +55,7 @@ module.exports.recoverOrchestratorTasks = function () {
                 tasks.set(id, task);
               }
               else if(!st.has(taskState)){
-                let state = taskState.substring(0,taskState.indexOf("k")+1)+"Failed";
+                let state = taskState.substring(0,taskState.lastIndexOf("k")+1)+"Failed";
                 DB.updateTaskState(TaskModel,id,state);
               }
           }

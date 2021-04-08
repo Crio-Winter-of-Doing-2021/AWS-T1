@@ -9,7 +9,6 @@ module.exports.recoverSchedulerTasks = function () {
     const TaskModel = scheduler.TaskModel;
     //Retrieve all the tasks which are in scheduled or running tasks irrespective of user
     TaskModel.find({taskState:{$in: ['scheduled', 'running']}}, function (err, results) {
-        console.log("**** Scheduler Recovery *****");
         if (err) {
           console.log('could not recover tasks');
         } else 

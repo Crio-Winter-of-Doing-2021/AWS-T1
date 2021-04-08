@@ -2,6 +2,39 @@ const DB = require("../db.js");
 const orchestrator = require("../routes/orchestrator");
 const axios = require("axios");
 
+function serverResponseHandler(obj,id,flag)
+{
+    TaskModel = orchestrator.TaskModel;
+    /* flag==0 -> got response, flag==1 -> got error */
+    if(flag==0)
+    {
+        response=obj;
+        let msg = {status:response.status,data:response.data};
+        msg=JSON.stringify(msg);
+        DB.updateServerResponse(TaskModel,id,msg);
+    }
+    else{
+        error=obj;
+        if (error.response) {
+            // The request was made and the server responded with a status code
+            // that falls out of the range of 2xx
+            let msg = {status:error.response.status,data:error.response.data};
+            msg=JSON.stringify(msg);
+            DB.updateServerResponse(TaskModel,id,msg);
+          } else if (error.request) {
+            // The request was made but no response was received
+            // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+            // http.ClientRequest in node.js
+            DB.updateServerResponse(TaskModel,id,"The request was made but no response was received");
+          } else {
+            // Something happened in setting up the request that triggered an Error
+            let msg = JSON.stringify(error.message);
+            msg=JSON.stringify(msg);
+            DB.updateServerResponse(TaskModel,id,msg);
+          }
+    }
+}
+
 /*Retry orchestration */
 function retries(id,conditionCheckRetries,timeDelayForRetries,conditionCheckURL,secondTaskURL,fallbackTaskURL){
     const TaskModel = orchestrator.TaskModel;
@@ -18,10 +51,12 @@ function retries(id,conditionCheckRetries,timeDelayForRetries,conditionCheckURL,
                     .then((response)=>
                     {
                         DB.updateTaskState(TaskModel,id,'secondTaskSuccess');
+                        serverResponseHandler(response,id,0);
                         console.log(response.data);
                     },
                     (error)=>{
                         DB.updateTaskState(TaskModel,id,'secondTaskFailed');
+                        serverResponseHandler(error,id,1);
                     });
             },
             (error)=>{
@@ -37,9 +72,11 @@ function retries(id,conditionCheckRetries,timeDelayForRetries,conditionCheckURL,
         .then((response)=>
         {
             DB.updateTaskState(TaskModel,id,'fallbackTaskSuccess');
+            serverResponseHandler(response,id,0);
         },
         (error)=>{
             DB.updateTaskState(TaskModel,id,'fallbackTaskFailed');
+            serverResponseHandler(error,id,1);
         });
     } 
 }
@@ -70,9 +107,11 @@ module.exports.executeOrchestration = function(id,conditionCheckRetries,timeDela
                 .then((response)=>
                 {
                     DB.updateTaskState(TaskModel,id,'secondTaskSuccess');
+                    serverResponseHandler(response,id,0);
                 },
                 (error)=>{
                     DB.updateTaskState(TaskModel,id,'secondTaskFailed');
+                    serverResponseHandler(error,id,1);
                 });
             },
             (error)=>{
@@ -83,6 +122,7 @@ module.exports.executeOrchestration = function(id,conditionCheckRetries,timeDela
     },
     (error) =>{
         DB.updateTaskState(TaskModel,id,'firstTaskFailed');
+        serverResponseHandler(error,id,1);
     });
 }
 
