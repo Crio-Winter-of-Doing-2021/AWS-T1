@@ -97,19 +97,19 @@ function recurse(id, taskURL, ind, tot_ind, conditionCheckURL, timeDelayForCondi
     if (ind>=tot_ind){
         return 
     }
-    DB.updateTaskState(orchestrator.TaskModel,id,'Running-'+ind+1);
+    DB.updateTaskState(orchestrator.TaskModel,id,'Running-'+(ind+1));
     executeTask(taskURL[ind], (res, err)=>{
         if(err){
-            DB.updateTaskState(orchestrator.TaskModel,id,'Failed-'+ind+1);
+            DB.updateTaskState(orchestrator.TaskModel,id,'Failed-'+(ind+1));
             serverResponseHandler(err,id,1);
         }
         else{
-            DB.updateTaskState(orchestrator.TaskModel, id, 'Success-'+ind+1);
+            DB.updateTaskState(orchestrator.TaskModel, id, 'Success-'+(ind+1));
             serverResponseHandler(res,id,1);
             setTimeout(function(){
                 axios.get(conditionCheckURL)
                 .then(response=>{
-                    DB.updateTaskState(orchestrator.TaskModel, id, 'conditionCheckSuccess');
+                    DB.updateTaskState(orchestrator.TaskModel, id, 'conditionCheckSuccess-'+(ind+1));
                     console.log(response.data);
                     recurse(id, taskURL, ind+1, tot_ind, conditionCheckURL, timeDelayForConditionCheck, timeDelayForRetries, fallbackTaskURL);
                 },
@@ -130,7 +130,6 @@ module.exports.executeOrchestration = function(id,conditionCheckRetries,timeDela
         tasks.delete(id);
         console.log('Deleted orchestration with id '+id +' from tasks map');
     }
-    console.log(tasksURL)
     if (!tasksURL){
         DB.updateTaskState(TaskModel, id, 'Failed')
         return
