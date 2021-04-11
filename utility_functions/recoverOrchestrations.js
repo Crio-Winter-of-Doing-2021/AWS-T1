@@ -24,8 +24,7 @@ module.exports.recoverOrchestratorTasks = function () {
               let timeDelayForRetries = results[i].timeDelayForRetries;
               let timeDelayForConditionCheck = results[i].timeDelayForConditionCheck;
               let conditionCheckURL = results[i].conditionCheckURL;
-              let firstTaskURL = results[i].firstTaskURL;
-              let secondTaskURL = results[i].secondTaskURL;
+              let tasksURL = results[i].tasksURL;
               let fallbackTaskURL = results[i].fallbackTaskURL;
               //console.log(JSON.stringify(results[i]));
               if(taskState=='scheduled')
@@ -49,8 +48,7 @@ module.exports.recoverOrchestratorTasks = function () {
                 //console.log(results[i].conditionCheckRetries);
                 var task = setTimeout(function () {
                     utils.executeOrchestration(id,conditionCheckRetries,timeDelayForRetries,
-                      timeDelayForConditionCheck,conditionCheckURL,firstTaskURL,
-                      secondTaskURL,fallbackTaskURL);
+                      timeDelayForConditionCheck,conditionCheckURL,tasksURL,fallbackTaskURL);
                 }, timeDelay);
                 tasks.set(id, task);
               }

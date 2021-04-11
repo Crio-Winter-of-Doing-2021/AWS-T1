@@ -47,9 +47,8 @@ router.get("/cancel", function (req, res) {
 router.post("/orchestrate",function(req,res){
     let taskName=req.body.taskName;
     let scheduledTime =  moment().format('LLLL');
-    let firstTaskURL = req.body.firstTaskURL;
+    let tasksURL = req.body.tasksURL.trim().split(",");
     let initialDelay = req.body.initialDelay;
-    let secondTaskURL = req.body.secondTaskURL;
     let conditionCheckURL = req.body.conditionCheckURL;
     let fallbackTaskURL = req.body.fallbackTaskURL;
     let timeDelayForConditionCheck = req.body.timeDelayForConditionCheck;
@@ -57,9 +56,8 @@ router.post("/orchestrate",function(req,res){
     let timeDelayForRetries = req.body.timeDelayForRetries;
     console.log("taskName: "+taskName);
     console.log("scheduledTime "+scheduledTime);
-    console.log("firstTaskURL: "+firstTaskURL);
+    console.log("tasksURL: "+tasksURL);
     console.log("initialDelay: "+initialDelay);
-    console.log("secondTaskURL: "+secondTaskURL);
     console.log("conditionCheckURL: "+conditionCheckURL);
     console.log("fallbackTaskURL: "+fallbackTaskURL);
     console.log("timeDelayForConditionCheck: "+timeDelayForConditionCheck);
@@ -70,8 +68,7 @@ router.post("/orchestrate",function(req,res){
         username:req.user.username,
         taskName:taskName,
         scheduledTime:scheduledTime,
-        firstTaskURL: firstTaskURL,
-        secondTaskURL: secondTaskURL,
+        tasksURL,
         conditionCheckURL: conditionCheckURL,
         fallbackTaskURL: fallbackTaskURL,
         taskState:'scheduled',
@@ -92,7 +89,7 @@ router.post("/orchestrate",function(req,res){
             let id = result._id.toString();
             utils.setFlashMessage(req,'success','orchestration successfully scheduled!',('TaskId '+id));
             var task = setTimeout(function () {
-                utils.executeOrchestration(id,conditionCheckRetries,timeDelayForRetries,timeDelayForConditionCheck,conditionCheckURL,firstTaskURL,secondTaskURL,fallbackTaskURL)
+                utils.executeOrchestration(id,conditionCheckRetries,timeDelayForRetries,timeDelayForConditionCheck,conditionCheckURL,tasksURL,fallbackTaskURL)
             },initialDelay);
             tasks.set(id,task);
         }
@@ -149,8 +146,7 @@ router.get("/retrieve-tasks/:id", function (req, res) {
           taskDetails['scheduledTime']=result.scheduledTime;
           if(result.username==req.user.username)
           {
-            taskDetails['firstTaskURL']=result.firstTaskURL;
-            taskDetails['secondTaskURL']=result.secondTaskURL;
+            taskDetails['tasksURL']=result.tasksURL;
             taskDetails['conditionCheckURL']=result.conditionCheckURL;
             taskDetails['fallbackTaskURL']=result.fallbackTaskURL;
           }
