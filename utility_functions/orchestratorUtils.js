@@ -1,11 +1,10 @@
 const DB = require("../db.js");
 const orchestrator = require("../routes/orchestrator");
 const axios = require("axios");
-const { response } = require("express");
 
 function serverResponseHandler(obj,id,flag)
 {
-    TaskModel = orchestrator.TaskModel;
+    const TaskModel = orchestrator.TaskModel;
     /* flag==0 -> got response, flag==1 -> got error */
     if(flag==0)
     {
@@ -37,7 +36,7 @@ function serverResponseHandler(obj,id,flag)
 }
 
 /*Retry orchestration */
-function retries(id,conditionCheckRetries,timeDelayForRetries,conditionCheckURL,secondTaskURL,fallbackTaskURL){
+function retries(id,conditionCheckRetries,timeDelayForRetries,conditionCheckURL,tasksURL,ind,fallbackTaskURL){
     const TaskModel = orchestrator.TaskModel;
     if(conditionCheckRetries>0)
     {
@@ -47,23 +46,12 @@ function retries(id,conditionCheckRetries,timeDelayForRetries,conditionCheckURL,
             .then((response)=>
             {
                 DB.updateTaskState(TaskModel,id,'conditionCheckTaskSuccess');
-                DB.updateTaskState(TaskModel,id,'secondTaskRunning');
-                    axios.get(secondTaskURL)
-                    .then((response)=>
-                    {
-                        DB.updateTaskState(TaskModel,id,'secondTaskSuccess');
-                        serverResponseHandler(response,id,0);
-                        console.log(response.data);
-                    },
-                    (error)=>{
-                        DB.updateTaskState(TaskModel,id,'secondTaskFailed');
-                        serverResponseHandler(error,id,1);
-                    });
+                recurse(id, tasksURL, ind+1,conditionCheckURL, timeDelayForConditionCheck, timeDelayForRetries, fallbackTaskURL, conditionCheckRetries)
             },
             (error)=>{
                 DB.updateTaskState(TaskModel,id,'conditionCheckTaskFailed');
                 //recursive statement
-                retries(id,conditionCheckRetries-1,timeDelayForRetries,conditionCheckURL,secondTaskURL,fallbackTaskURL);
+                retries(id,conditionCheckRetries-1,timeDelayForRetries,conditionCheckURL,tasksURL,ind,fallbackTaskURL);
             });
         },timeDelayForRetries); 
     }
@@ -93,29 +81,29 @@ function executeTask(url, callback){
     })
 }
 
-function recurse(id, taskURL, ind, tot_ind, conditionCheckURL, timeDelayForConditionCheck, timeDelayForRetries, fallbackTaskURL, conditionCheckRetries){
-    if (ind>=tot_ind){
-        return 
+function recurse(id, tasksURL, ind, conditionCheckURL, timeDelayForConditionCheck, timeDelayForRetries, fallbackTaskURL, conditionCheckRetries){
+    if (ind>=tasksURL.length){
+        return;
     }
     DB.updateTaskState(orchestrator.TaskModel,id,'Running-'+(ind+1));
-    executeTask(taskURL[ind], (res, err)=>{
+    executeTask(tasksURL[ind], (res, err)=>{
         if(err){
             DB.updateTaskState(orchestrator.TaskModel,id,'Failed-'+(ind+1));
             serverResponseHandler(err,id,1);
         }
         else{
             DB.updateTaskState(orchestrator.TaskModel, id, 'Success-'+(ind+1));
-            serverResponseHandler(res,id,1);
+            serverResponseHandler(res,id,0);
             setTimeout(function(){
                 axios.get(conditionCheckURL)
                 .then(response=>{
                     DB.updateTaskState(orchestrator.TaskModel, id, 'conditionCheckSuccess-'+(ind+1));
                     console.log(response.data);
-                    recurse(id, taskURL, ind+1, tot_ind, conditionCheckURL, timeDelayForConditionCheck, timeDelayForRetries, fallbackTaskURL);
+                    recurse(id, tasksURL, ind+1, conditionCheckURL, timeDelayForConditionCheck, timeDelayForRetries, fallbackTaskURL,conditionCheckRetries);
                 },
                 error=>{
                     DB.updateTaskState(orchestrator.TaskModel, id, 'conditionCheckFailed');
-                    retries(id,conditionCheckRetries,timeDelayForRetries,conditionCheckURL,secondTaskURL,fallbackTaskURL);
+                    retries(id,conditionCheckRetries,timeDelayForRetries,conditionCheckURL,tasksURL,ind,fallbackTaskURL);
                 })
             }, timeDelayForConditionCheck)
         }
@@ -131,10 +119,10 @@ module.exports.executeOrchestration = function(id,conditionCheckRetries,timeDela
         console.log('Deleted orchestration with id '+id +' from tasks map');
     }
     if (!tasksURL){
-        DB.updateTaskState(TaskModel, id, 'Failed')
-        return
+        DB.updateTaskState(TaskModel, id, 'Failed');
+        return;
     }
-    recurse(id, tasksURL, 0, tasksURL.length, conditionCheckURL, timeDelayForRetries, timeDelayForConditionCheck, fallbackTaskURL, conditionCheckRetries);
+    recurse(id, tasksURL, 0, conditionCheckURL, timeDelayForRetries, timeDelayForConditionCheck, fallbackTaskURL, conditionCheckRetries);
 }
 
 
