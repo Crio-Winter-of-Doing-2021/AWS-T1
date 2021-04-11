@@ -154,6 +154,7 @@ router.get("/retrieve-tasks/:id", function (req, res) {
           taskDetails['initialDelay']=result.initialDelay;
           taskDetails['timeDelayForRetries']=result.timeDelayForRetries;
           taskDetails['timeDelayForConditionCheck']=result.timeDelayForConditionCheck;
+          taskDetails['taskStateDetailed']=result.taskStateDetailed
           if(result.username==req.user.username&&result.serverResponse!=undefined){
             taskDetails['serverResponse']=JSON.stringify(result.serverResponse);
           }
