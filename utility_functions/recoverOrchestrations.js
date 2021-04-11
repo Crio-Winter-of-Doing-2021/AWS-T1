@@ -12,10 +12,7 @@ module.exports.recoverOrchestratorTasks = function () {
           console.log('could not recover tasks');
         } 
         else 
-        {
-            const st = new Set(["secondTaskSuccess","fallbackTaskSuccess","fallbackTaskFailed",
-            "secondTaskFailed","cancelled","firstTaskFailed","firstTaskSuccess"]);
-            
+        {    
           for(var i=0;i<results.length;i++)
           {
               var taskState=results[i].taskState;
@@ -24,8 +21,7 @@ module.exports.recoverOrchestratorTasks = function () {
               let timeDelayForRetries = results[i].timeDelayForRetries;
               let timeDelayForConditionCheck = results[i].timeDelayForConditionCheck;
               let conditionCheckURL = results[i].conditionCheckURL;
-              let firstTaskURL = results[i].firstTaskURL;
-              let secondTaskURL = results[i].secondTaskURL;
+              let tasksURL = results[i].tasksURL;
               let fallbackTaskURL = results[i].fallbackTaskURL;
               //console.log(JSON.stringify(results[i]));
               if(taskState=='scheduled')
@@ -49,14 +45,13 @@ module.exports.recoverOrchestratorTasks = function () {
                 //console.log(results[i].conditionCheckRetries);
                 var task = setTimeout(function () {
                     utils.executeOrchestration(id,conditionCheckRetries,timeDelayForRetries,
-                      timeDelayForConditionCheck,conditionCheckURL,firstTaskURL,
-                      secondTaskURL,fallbackTaskURL);
+                      timeDelayForConditionCheck,conditionCheckURL,tasksURL,fallbackTaskURL);
                 }, timeDelay);
                 tasks.set(id, task);
               }
-              else if(!st.has(taskState)){
-                let state = taskState.substring(0,taskState.lastIndexOf("k")+1)+"Failed";
-                DB.updateTaskState(TaskModel,id,state);
+              else if(taskState=='running'){
+                DB.updateTaskState(TaskModel,id,'failed');
+                DB.updateTaskStateDetailed(TaskModel,id,'Server Crashed');
               }
           }
         }
