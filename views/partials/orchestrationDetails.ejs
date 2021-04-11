@@ -9,13 +9,15 @@
 <!-- Task Details -->
 <%for(var i=results.length-1;i>=0;i--){%>
     <%let state = results[i].taskState;%>
-    <%if(state=="secondTaskSuccess"||state=="fallbackTaskSuccess"){%>
+    <%if(state=="completed"){%>
         <%state = "completed";%>
     <%} else if(state=="scheduled"){ %>
         <%state = "scheduled";%>
-    <%} else if(state=="firstTaskFailed"||state=="secondTaskFailed"||state=="fallbackTaskFailed"){%>
+    <%} else if(state=="failed"){%>
         <%state = "failed";%>
-    <%}else if(state!="cancelled"){%>
+    <%}else if(state=="cancelled"){%>
+        <%state="cancelled";%>
+    <%}else if(state!="running"){%>
         <%state="running";%>
     <%}%>
     <%let buttonType=mp.get(state).buttonType;%>
