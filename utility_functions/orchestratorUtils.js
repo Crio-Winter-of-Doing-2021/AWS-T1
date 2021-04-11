@@ -56,6 +56,7 @@ function retries(id,conditionCheckRetries,timeDelayForRetries,conditionCheckURL,
         },timeDelayForRetries); 
     }
     else{
+        DB.updateTaskState(TaskModel,id,'failed');
         DB.updateTaskStateDetailed(TaskModel,id,'fallbackTaskRunning');
         axios.get(fallbackTaskURL)
         .then((response)=>
@@ -83,7 +84,7 @@ function executeTask(url, callback){
 
 function recurse(id, tasksURL, ind, conditionCheckURL, timeDelayForConditionCheck, timeDelayForRetries, fallbackTaskURL, conditionCheckRetries){
     if (ind>=tasksURL.length){
-        DB.updateTaskState(orchestrator.TaskModel,id,'completed')
+        DB.updateTaskState(orchestrator.TaskModel,id,'completed');
         return;
     }
     executeTask(tasksURL[ind], (res, err)=>{
@@ -94,19 +95,25 @@ function recurse(id, tasksURL, ind, conditionCheckURL, timeDelayForConditionChec
         else{
             DB.updateTaskStateDetailed(orchestrator.TaskModel, id, 'Success-'+(ind+1));
             serverResponseHandler(res,id,0);
-            setTimeout(function(){
-                DB.updateTaskStateDetailed(orchestrator.TaskModel, id, 'conditionCheckTaskRunning-'+(ind+1));
-                axios.get(conditionCheckURL)
-                .then(response=>{
-                    DB.updateTaskStateDetailed(orchestrator.TaskModel, id, 'conditionCheckTaskSuccess-'+(ind+1));
-                    console.log(response.data);
-                    recurse(id, tasksURL, ind+1, conditionCheckURL, timeDelayForConditionCheck, timeDelayForRetries, fallbackTaskURL,conditionCheckRetries);
-                },
-                error=>{
-                    DB.updateTaskStateDetailed(orchestrator.TaskModel, id, 'conditionCheckTaskFailed');
-                    retries(id,conditionCheckRetries,timeDelayForRetries,conditionCheckURL,tasksURL,ind,fallbackTaskURL);
-                })
-            }, timeDelayForConditionCheck)
+            if(ind!=tasksURL.length-1)
+            {
+                setTimeout(function(){
+                    DB.updateTaskStateDetailed(orchestrator.TaskModel, id, 'conditionCheckTaskRunning');
+                    axios.get(conditionCheckURL)
+                    .then(response=>{
+                        DB.updateTaskStateDetailed(orchestrator.TaskModel, id, 'conditionCheckTaskSuccess');
+                        console.log(response.data);
+                        recurse(id, tasksURL, ind+1, conditionCheckURL, timeDelayForConditionCheck, timeDelayForRetries, fallbackTaskURL,conditionCheckRetries);
+                    },
+                    error=>{
+                        DB.updateTaskStateDetailed(orchestrator.TaskModel, id, 'conditionCheckTaskFailed');
+                        retries(id,conditionCheckRetries,timeDelayForRetries,conditionCheckURL,tasksURL,ind,fallbackTaskURL);
+                    })
+                }, timeDelayForConditionCheck);
+            }
+            else{
+                DB.updateTaskState(orchestrator.TaskModel,id,'completed');
+            }
         }
     })
 }

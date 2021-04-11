@@ -77,7 +77,7 @@ module.exports.updateTaskState = function (TaskModel, id, taskState) {
         );
       } else {
         console.log(
-          " " + taskState + " of taskId " + id
+          "Updated taskstate to " + taskState + " of taskId " + id
         );
       }
     }

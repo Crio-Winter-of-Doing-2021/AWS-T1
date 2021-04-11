@@ -12,11 +12,7 @@ module.exports.recoverOrchestratorTasks = function () {
           console.log('could not recover tasks');
         } 
         else 
-        {
-            // const st = new Set(["secondTaskSuccess","fallbackTaskSuccess","fallbackTaskFailed",
-            // "secondTaskFailed","cancelled","firstTaskFailed","firstTaskSuccess"]);
-          const st = new Set(["completed", "running", "failed", "Failed", "conditionCheckTaskRunning", "conditionCheckTaskSuccess", "conditionCheckTaskFailed"]);
-            
+        {    
           for(var i=0;i<results.length;i++)
           {
               var taskState=results[i].taskState;
@@ -53,9 +49,9 @@ module.exports.recoverOrchestratorTasks = function () {
                 }, timeDelay);
                 tasks.set(id, task);
               }
-              else if(!st.has(taskState)){
-                let state = taskState.substring(0,taskState.lastIndexOf("k")+1)+"Failed";
-                DB.updateTaskState(TaskModel,id,state);
+              else if(taskState=='running'){
+                DB.updateTaskState(TaskModel,id,'failed');
+                DB.updateTaskStateDetailed(TaskModel,id,'Server Crashed');
               }
           }
         }

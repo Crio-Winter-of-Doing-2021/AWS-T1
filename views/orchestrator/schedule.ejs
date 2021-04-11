@@ -34,26 +34,26 @@
                       required
                     />
                   </div>
-                <div class="form-row">
-                    <div class="form-group col-md-6">
-                        <label for="firstTaskURL">Tasks URL separated by comma</label>
-                        <input type="text" class="form-control" name="tasksURL"  required>
-                    </div>
-                    <div class="form-group col-md-6">
-                        <label for="initialDelay">Initial Delay</label>
-                        <input type="number" min="0" class="form-control" name="initialDelay" placeholder="Time Delay in millliseconds" required>
-                    </div>
+                <div class="form-group">
+                    <label for="firstTaskURL">Tasks URL</label>
+                    <input type="text" class="form-control" name="tasksURL" placeholder="enter tasks urls separated by comma(,)"  required>
                 </div>
                 <div class="form-row">
+                   
+                    <div class="form-group col-md-6">
+                        <label for="conditionCheckURL">ConditionCheck Task URL</label>
+                        <input type="url" class="form-control" name="conditionCheckURL"  required>
+                    </div>
                     <div class="form-group col-md-6">
                         <label for="fallbackTaskURL">Fallback Task URL</label>
                         <input type="url" class="form-control" name="fallbackTaskURL"  required>
                     </div>
+                    
                 </div>
                 <div class="form-row">
                     <div class="form-group col-md-6">
-                        <label for="conditionCheckURL">Condition Check URL</label>
-                        <input type="url" class="form-control" name="conditionCheckURL"  required>
+                        <label for="initialDelay">Initial Delay</label>
+                        <input type="number" min="0" class="form-control" name="initialDelay" placeholder="Time Delay in millliseconds" required>
                     </div>
                     <div class="form-group col-md-6">
                         <label for="timeDelayForConditionCheck">Time Delay For Condition Check</label>
