@@ -13,8 +13,9 @@ module.exports.recoverOrchestratorTasks = function () {
         } 
         else 
         {
-            const st = new Set(["secondTaskSuccess","fallbackTaskSuccess","fallbackTaskFailed",
-            "secondTaskFailed","cancelled","firstTaskFailed","firstTaskSuccess"]);
+            // const st = new Set(["secondTaskSuccess","fallbackTaskSuccess","fallbackTaskFailed",
+            // "secondTaskFailed","cancelled","firstTaskFailed","firstTaskSuccess"]);
+          const st = new Set(["completed", "running", "failed", "Failed", "conditionCheckTaskRunning", "conditionCheckTaskSuccess", "conditionCheckTaskFailed"]);
             
           for(var i=0;i<results.length;i++)
           {

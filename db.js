@@ -56,6 +56,7 @@ module.exports.createOrchestratorCollection = function(){
     conditionCheckURL:String,
     fallbackTaskURL:String,
     taskState:String,
+    taskStateDetailed: String,
     conditionCheckRetries:Number,
     initialDelay:Number,
     timeDelayBetweenRetries:Number,
@@ -76,12 +77,30 @@ module.exports.updateTaskState = function (TaskModel, id, taskState) {
         );
       } else {
         console.log(
-          "Updated taskState to " + taskState + " of taskId " + id
+          " " + taskState + " of taskId " + id
         );
       }
     }
   );
 };
+
+module.exports.updateTaskStateDetailed = function (TaskModel, id, taskStateDetailed){
+  TaskModel.findByIdAndUpdate(
+    id,
+    { taskStateDetailed: taskStateDetailed },
+    function (err, result) {
+      if (err) {
+        console.log(
+          "could not update to taskStateDetailed " + taskStateDetailed + " of taskId " + id
+        );
+      } else {
+        console.log(
+          "Updated taskStateDetailed to " + taskStateDetailed + " of taskId " + id
+        );
+      }
+    }
+  );
+}
 
 module.exports.updateRetriesLeft = function (TaskModel, id, retriesLeft) {
   TaskModel.findByIdAndUpdate(
