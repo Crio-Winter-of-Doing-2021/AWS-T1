@@ -143,6 +143,7 @@ router.get("/retrieve-tasks/:id", function (req, res) {
           taskDetails['taskId']=result._id;
           taskDetails['scheduledBy']=result.username;
           taskDetails['taskState']=result.taskState;
+          taskDetails['taskStateDetailed']=result.taskStateDetailed;
           taskDetails['scheduledTime']=result.scheduledTime;
           if(result.username==req.user.username)
           {
@@ -154,7 +155,6 @@ router.get("/retrieve-tasks/:id", function (req, res) {
           taskDetails['initialDelay']=result.initialDelay;
           taskDetails['timeDelayForRetries']=result.timeDelayForRetries;
           taskDetails['timeDelayForConditionCheck']=result.timeDelayForConditionCheck;
-          taskDetails['taskStateDetailed']=result.taskStateDetailed
           if(result.username==req.user.username&&result.serverResponse!=undefined){
             taskDetails['serverResponse']=JSON.parse(result.serverResponse);
           }
