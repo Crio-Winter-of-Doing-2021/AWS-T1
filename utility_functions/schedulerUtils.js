@@ -92,7 +92,9 @@ function lambdaErrorHandler(error,id, url, params,retriesCount,timeDelayBetweenR
     // The request was made but no response was received
     // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
     // http.ClientRequest in node.js
-    DB.updateServerResponse(TaskModel,id,"The request was made to lambda but no response was received");
+    let msg = {msg:"The request was made to lambda but no response was received"};
+    msg=JSON.stringify(msg);
+    DB.updateServerResponse(TaskModel,id,msg);
   } else {
     // Something happened in setting up the request that triggered an Error
     let msg = JSON.stringify(error.message);
