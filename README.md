@@ -67,7 +67,7 @@ Users can use these endpoints to schedule/retrieve/ and cancel orchestrations(la
     1.  All        : retrieves all tasks created by **any** user irrespective of task-state
     2.  scheduled  : retrieves all tasks created by logged in user in scheduled state
     3.  running    : retrieves all tasks created by logged in user in running state
-    4.  success    : retrieves all tasks created by logged in user in completed state
+    4.  completed    : retrieves all tasks created by logged in user in completed state
     5.  cancelled  : retrieves all tasks created by logged in user in cancelled state
 
 ## /orchestrator/cancel
