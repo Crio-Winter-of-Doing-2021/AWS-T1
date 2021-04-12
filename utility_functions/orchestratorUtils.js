@@ -90,6 +90,7 @@ function recurse(id, tasksURL, ind, conditionCheckURL, timeDelayForConditionChec
     executeTask(tasksURL[ind], (res, err)=>{
         if(err){
             DB.updateTaskStateDetailed(orchestrator.TaskModel,id,'Failed-'+(ind+1));
+            DB.updateTaskState(orchestrator.TaskModel, id, 'failed');
             serverResponseHandler(err,id,1);
         }
         else{
