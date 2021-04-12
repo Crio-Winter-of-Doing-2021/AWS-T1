@@ -1,7 +1,7 @@
 # Open source scheduler and orchestrator for Lambda functions
 
 # AWS-T1
-Team ID: AWS-T1 | Team Members: Pushpendra kumar Shantanu Sharma
+Team ID: AWS-T1 | Team Members: Pushpendra kumar, Shantanu Sharma
 
 # Tech Stack
 1.  Backend  : Express, MongoDB
@@ -31,17 +31,19 @@ Users can use these endpoints to schedule/retrieve/modify and cancel tasks(lambd
 
 ## /scheduler/modify
 1.  Accepts Task Id, modified date and time 
-2.  If the task has not been triggered i.e its scheduled time is farther from moment at which task is modified then it re-schedules the task at the (modified date and time) else returns that task cannot be modified.
+2.  Only the tasks in scheduled state can be modified 
+2.  It re-schedules the task at the (modified date and time) else returns that task cannot be modified.
 
 ## /scheduler/cancel
 1.  Accepts taskId of the task to be cancelled
-2.  If the task has not been triggered i.e its scheduled time is farther from moment at which task is cancelled then it cancels task and Returns a boolean value to confirm the task has been cancelled, else returns that task cannot be cancelled.
+2.  Only the tasks in scheduled state can be cancelled
+2.  It cancels task and Returns a boolean value to confirm the task has been cancelled, else returns that task cannot be cancelled.
 
 # Task Orchestrator
 1.  User provides sequence of tasks and an additional condition check task as input to the Orchestrator library. These need to be scheduled in sequence. All the tasks and the condition check task will be in the form of lambda functions. User will also provide initial delay for the first Task.
 2.  The Orchestrator library will schedule these tasks (and the condition check task) as a Task Set and return the Task Set Id to the user.
-3.  workflow
-    The Orchestrator library will execute the first task from the sequence of tasks after that initial delay. It will then execute the condition check task after an delay of conditionCheckTaskDelay and check if it returns success. If success, it will execute the second task in the sequence else it will re-trigger condition check url till it succeeds or conditionCheckRetries expires. If retries expires, fallback task gets executed.
+3.  Workflow:
+    The Orchestrator library will execute the first task from the sequence of tasks after the initial delay expires. It will then execute the condition check task after an delay of conditionCheckTaskDelay and check its status. If success, it will execute the second task in the sequence else it will re-trigger condition check url till it succeeds or conditionCheckRetries expires. If retries expires, fallback task gets executed else orchestrator moves to the next task in sequence.
 4.  Explanation taskStates orchestration
     1. scheduled: First task is yet to be executed i.e initial delay has not expired
     2. running: Executing a task from the sequence of orchestration tasks or executing the condition check task 
@@ -65,10 +67,11 @@ Users can use these endpoints to schedule/retrieve/ and cancel orchestrations(la
     1.  All        : retrieves all tasks created by **any** user irrespective of task-state
     2.  scheduled  : retrieves all tasks created by logged in user in scheduled state
     3.  running    : retrieves all tasks created by logged in user in running state
-    4.  completed    : retrieves all tasks created by logged in user in completed state
+    4.  completed  : retrieves all tasks created by logged in user in completed state
     5.  cancelled  : retrieves all tasks created by logged in user in cancelled state
 
 ## /orchestrator/cancel
 1.  Accepts taskId of the task to be cancelled
-2.  If the task has not been triggered i.e its initial delay(time at which first task in orchestration sequence will get executed) has not expired then it cancels task and Returns a boolean value to confirm the task has been cancelled, else returns that task cannot be cancelled.
+2.  Only the orchestrations in scheduled state can be cancelled i.e first task has not executed yet.
+2.  It cancels task and Returns a boolean value to confirm the task has been cancelled, else returns that task cannot be cancelled.
 
