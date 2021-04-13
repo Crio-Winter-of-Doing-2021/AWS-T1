@@ -61,12 +61,17 @@ router.get("/retrieve-tasks/:id", function (req, res) {
     else if(req.user.username!=result.username){
       res.json({Alert:'Not authorised'});
     }
-    else if(result.serverResponse==undefined)
+    else if(result.serverResponse!=undefined){
+      try{
+        res.json(JSON.parse(result.serverResponse));
+      }
+      catch(err){
+        res.json({msg:result.serverResponse});
+      }
+    }
+    else 
     {
       res.json({Alert:'No Response from Server'});
-    }
-    else if(result.serverResponse!=undefined){
-      res.json(JSON.parse(result.serverResponse));
     }
   });
 });
