@@ -1,8 +1,9 @@
 const mongoose = require("mongoose");
+require('dotenv').config();
 const passportLocalMongoose = require("passport-local-mongoose");
 /*connects to database schedulerDB */
 module.exports.connection = function () {
-  mongoose.connect("mongodb://localhost:27017/schedulerDB", {
+  mongoose.connect(process.env.DB_CONNECTION_URL, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useCreateIndex: true,
